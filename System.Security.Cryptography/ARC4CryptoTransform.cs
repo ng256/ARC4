@@ -1,19 +1,30 @@
 namespace System.Security.Cryptography
 {
+	/// <summary>
+	/// Performs cryptographic transformation of data using the <see cref = "ARC4CryptoProvider" /> algorithm.
+	/// This class is not inherited.
+	/// </summary> 
 	public sealed class ARC4CryptoTransform : ICryptoTransform, IDisposable
 	{
 		private ARC4CryptoProvider _arc4;
 
 		private bool _disposed = false;
-
+		
+		/// <summary>
+		/// Current internal state of the algorithm <see cref = "ARC4" />.
+		/// </summary> 
 		public ARC4SBlock State => _arc4.State;
 
+		/// <inheritdoc cref="ICryptoTransform.InputBlockSize"/>
 		public int InputBlockSize => 1;
 
+		/// <inheritdoc cref="ICryptoTransform.OutputBlockSize"/>
 		public int OutputBlockSize => 1;
 
+		/// <inheritdoc cref="ICryptoTransform.CanTransformMultipleBlocks"/>
 		public bool CanTransformMultipleBlocks => true;
 
+		/// <inheritdoc cref="ICryptoTransform.CanReuseTransform"/>
 		public bool CanReuseTransform => true;
 
 		public ARC4CryptoTransform(byte[] key)
@@ -67,7 +78,8 @@ namespace System.Security.Cryptography
 			_arc4 = new ARC4CryptoProvider(key, sblock);
 		}
 
-		public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+		/// <inheritdoc cref="ICryptoTransform.TransformBlock"/>
+ 		public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
 		{
 			if (inputBuffer == null)
 			{
@@ -90,6 +102,7 @@ namespace System.Security.Cryptography
 			return inputCount;
 		}
 
+		/// <inheritdoc cref="ICryptoTransform.TransformFinalBlock"/>
 		public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
 		{
 			if (inputBuffer == null)
@@ -110,13 +123,14 @@ namespace System.Security.Cryptography
 			return outputBuffer;
 		}
 
+		/// <inheritdoc cref="IDisposable.Dispose"/>
 		public void Dispose()
 		{
 			Dispose(disposing: true);
 			GC.SuppressFinalize(this);
 		}
 
-		public void Dispose(bool disposing)
+		private void Dispose(bool disposing)
 		{
 			if (disposing && !_disposed)
 			{
