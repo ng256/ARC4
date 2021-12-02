@@ -4,7 +4,8 @@ using System.Text;
 namespace System.Security.Cryptography
 {
 	/// <summary>
-	/// Implements the function of generating a key based on a password using a pseudo-random number generator <see cref = "System.Security.Cryptography.ARC4" />.
+	/// Implements the function of generating a key based on a password using a pseudo-random number generator 
+	/// <see cref = "System.Security.Cryptography.ARC4" />.
 	/// </summary> 
 	public class ARC4DeriveBytes : DeriveBytes
 	{
@@ -19,8 +20,7 @@ namespace System.Security.Cryptography
 		public ARC4SBlock State => _arc4.State;
 
 		/// <summary>
-		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />,
-		/// using the specified parameters.
+		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />, using the specified parameters.
 		/// </summary>
 		/// <param name = "key"> Encryption key. </param>
 		/// <param name = "iv"> Initialization vector. </param> 
@@ -36,8 +36,7 @@ namespace System.Security.Cryptography
 		}
 
 		/// <summary>
-		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />,
-		/// using the specified parameters.
+		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />, using the specified parameters.
 		/// </summary>
 		/// <param name = "key"> Encryption key. </param>
 		/// <param name = "sblock">
@@ -51,8 +50,7 @@ namespace System.Security.Cryptography
 		}
 
 		/// <summary>
-		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />,
-		/// using the specified parameters.
+		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />, using the specified parameters.
 		/// </summary>
 		/// <param name = "password"> Password. </param>
 		/// <param name = "encoding"> Character encoding for password conversion. </param>
@@ -69,8 +67,7 @@ namespace System.Security.Cryptography
 		}
 
 		/// <summary>
-		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />,
-		/// using the specified parameters.
+		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />, using the specified parameters.
 		/// </summary>
 		/// <param name = "password"> Password. </param>
 		/// <param name = "encoding"> Character encoding for password conversion. </param>
