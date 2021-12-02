@@ -33,3 +33,61 @@ This part of the algorithm is called the pseudo-random generation algorithm (PRG
 # Library contents.
 - **System.Security.Cryptography** includes an implementation of the **SymmetricAlgorithm** and **DeriveBytes** base classes for the ARC4 algorithm.
 - **System.IO** include an implementation of a stream that contains encrypted data using ARC4 algorithm.
+
+# Usage.
+To register the algorithm mapping names for the current application domain, try the following.
+```csharp
+using System.Security.Cryptography;
+// ...
+
+ARC4.Register();
+```
+Example of encryption and decryption data.
+ ```csharp
+using System.Security.Cryptography;
+// ...
+
+byte[] password = Encoding.UTF8.GetBytes("password");
+byte[] data = Encoding.UTF8.GetBytes("secret");
+byte[] encrypted, restored;
+using (var arc4 = ARC4.Create(password, ARC4SBlock.DefaultSBlock))
+{
+    using(var transform = arc4.CreateEncryptor())
+    {
+        encrypted = transform.TransformFinalBlock(data, 0, data.Length);
+    }
+
+    using(var transform = arc4.CreateDecryptor())
+    {
+        restored = transform.TransformFinalBlock(data, 0, data.Length);
+    }
+}
+```
+Example of using cryptographic stream.
+```csharp
+using System.Security.Cryptography;
+// ...
+
+string password = "password";
+string data = "secret";
+string restored;
+using (var memory = new MemoryStream())
+{
+    using (var stream = new ARC4Stream(memory, password, ARC4SBlock.DefaultSBlock))
+    {
+        using (StreamWriter writer = new StreamWriter(stream))
+        {
+            writer.Write(data);
+        }
+    }
+    memory.Seek(0, SeekOrigin.Begin);
+    using (var stream = new ARC4Stream(memory, password, ARC4SBlock.DefaultSBlock))
+    {
+        using (StreamReader reader = new StreamReader(stream))
+        {
+            restored = reader.ReadToEnd();
+        }
+    }
+}
+
+```
