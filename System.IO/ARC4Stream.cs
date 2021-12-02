@@ -3,6 +3,9 @@ using System.Text;
 
 namespace System.IO
 {
+	/// <summary>
+	/// Implements the stream <see cref = "CryptoStream" />, using a cryptographic algorithm <see cref = "ARC4" />.
+	/// This class could not be inherited. 
 	public sealed class ARC4Stream : Stream
 	{
 		private Stream _stream;
