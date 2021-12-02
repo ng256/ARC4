@@ -4,7 +4,7 @@ namespace System.Security.Cryptography
 {
         /// <summary>
         /// Represents the initial state of the cryptographic algorithm <see cref = "ARC4" />.
-        /// This class is not inherited.
+        /// This class could not be inherited.
         /// </summary> 
         [Serializable]
 	[StructLayout(LayoutKind.Sequential, Pack = 1, Size = 256)]
@@ -57,7 +57,7 @@ namespace System.Security.Cryptography
 			return new ARC4SBlock(bytes);
 		}
                 
-                internal static bool ValidBytes(byte[] bytes)
+                internal static bool ValidBytes(byte[] bytes) // Checking that all 256 values should not be duplicated.
 		{
 			if (bytes == null || bytes.Length != 256)
 			{
@@ -76,7 +76,7 @@ namespace System.Security.Cryptography
 			return true;
 		}
 
-		private ARC4SBlock()
+		private ARC4SBlock() // Default S-Block
 		{
 			for (int i = 0; i < 256; i++)
 			{
@@ -84,7 +84,7 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		internal ARC4SBlock(byte[] bytes)
+		internal ARC4SBlock(byte[] bytes) // Specified S-Block.
 		{
 			_bytes = new byte[256];
 			Array.Copy(bytes, _bytes, 256);
