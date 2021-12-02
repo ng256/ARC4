@@ -2,9 +2,10 @@ using System.ComponentModel;
 
 namespace System.Security.Cryptography
 {
+	// Provides methods and properties for implementing ARC4 data encryption.
 	internal sealed class ARC4CryptoProvider : CryptoProvider, IDisposable
 	{
-		private byte[] _sblock = new byte[256];
+		private byte[] _sblock = new byte[256]; // S
 
 		private int x = 0;
 
@@ -21,7 +22,12 @@ namespace System.Security.Cryptography
 			array[index2] = b;
 		}
 
-		private byte NextByte()
+		/ * Pseudo-random number generator
+		    To generate the keystream, the cipher uses a hidden internal state, which consists of two parts:
+		    - A permutation containing all possible bytes from 0x00 to 0xFF (array _sblock).
+		    - Variables-counters x and y.
+		* / 
+		private byte NextByte() // PRGA
 		{
 			x = (x + 1) % 256;
 			y = (y + _sblock[x]) % 256;
@@ -52,7 +58,7 @@ namespace System.Security.Cryptography
 			}
 			catch (Exception e)
 			{
-				throw new CryptographicException(AssemblyMessageFormatter.DefaultFormatter.GetMessage("Arg_CryptographyException") + " " + e.Message, e);
+				throw new CryptographicException($"{AssemblyMessageFormatter.DefaultFormatter.GetMessage("Arg_CryptographyException")} {e.Message}", e);
 			}
 		}
 
@@ -87,7 +93,7 @@ namespace System.Security.Cryptography
 			}
 			catch (Exception e)
 			{
-				throw new CryptographicException(AssemblyMessageFormatter.DefaultFormatter.GetMessage("Arg_CryptographyException") + " " + e.Message, e);
+				throw new CryptographicException($"{AssemblyMessageFormatter.DefaultFormatter.GetMessage("Arg_CryptographyException")} {e.Message}", e);
 			}
 		}
 
@@ -131,6 +137,7 @@ namespace System.Security.Cryptography
 			return new ARC4CryptoProvider(key, iv);
 		}
 
+                // Performs symmetric encryption using the ARC4 algorithm. 
 		public override void Cipher(byte[] buffer, int offset, int count)
 		{
 			if (buffer == null)
@@ -164,7 +171,7 @@ namespace System.Security.Cryptography
 			}
 			catch (Exception e)
 			{
-				throw new CryptographicException(AssemblyMessageFormatter.DefaultFormatter.GetMessage("Arg_CryptographyException") + " " + e.Message, e);
+				throw new CryptographicException($"{AssemblyMessageFormatter.DefaultFormatter.GetMessage("Arg_CryptographyException")} {e.Message}", e);
 			}
 		}
 
