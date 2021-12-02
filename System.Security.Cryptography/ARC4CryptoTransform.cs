@@ -2,12 +2,11 @@ namespace System.Security.Cryptography
 {
 	/// <summary>
 	/// Performs cryptographic transformation of data using the <see cref = "ARC4CryptoProvider" /> algorithm.
-	/// This class is not inherited.
+	/// This class could not be inherited.
 	/// </summary> 
 	public sealed class ARC4CryptoTransform : ICryptoTransform, IDisposable
 	{
 		private ARC4CryptoProvider _arc4;
-
 		private bool _disposed = false;
 		
 		/// <summary>
@@ -27,6 +26,11 @@ namespace System.Security.Cryptography
 		/// <inheritdoc cref="ICryptoTransform.CanReuseTransform"/>
 		public bool CanReuseTransform => true;
 
+
+		/// <summary>
+		/// Initializes a new instance <see cref = "ARC4CryptoTransform" />, using the specified parameters.
+		/// </summary>
+		/// <param name = "key"> Encryption key. </param>
 		public ARC4CryptoTransform(byte[] key)
 		{
 			if (key == null)
@@ -40,6 +44,11 @@ namespace System.Security.Cryptography
 			_arc4 = new ARC4CryptoProvider(key);
 		}
 
+		/// <summary>
+		/// Initializes a new instance <see cref = "ARC4CryptoTransform" />, using the specified parameters.
+		/// </summary>
+		/// <param name = "key"> Encryption key. </param>
+		/// <param name = "iv"> Initialization vector. </param> 
 		public ARC4CryptoTransform(byte[] key, byte[] iv)
 		{
 			if (key == null)
@@ -61,6 +70,13 @@ namespace System.Security.Cryptography
 			_arc4 = new ARC4CryptoProvider(key, iv);
 		}
 
+		/// <summary>
+		/// Initializes a new instance <see cref = "ARC4CryptoTransform" />, using the specified parameters.
+		/// </summary>
+		/// <param name = "key"> Encryption key. </param>
+		/// <param name = "sblock">
+		/// <see cref = "ARC4SBlock" /> used as the initial state of the ARC4 algorithm.
+		/// </param> 
 		public ARC4CryptoTransform(byte[] key, ARC4SBlock sblock)
 		{
 			if (key == null)
