@@ -3,15 +3,13 @@ using System.Linq;
 namespace System.Security.Cryptography
 {
 	/// <summary>
-	/// Gets access to the managed version <see cref = "ARC4CryptoProvider" />.
-	/// This class is not inherited.
+	/// Provides managed version <see cref = "ARC4CryptoProvider" />.
+	/// This class could not be inherited.
 	/// </summary> 
 	public sealed class ARC4Managed : ARC4
 	{
 		private const int KeySizeDefaultValue = 256;
-
 		private const int IVSizeValue = 256;
-
 		private bool _disposed = false;
 
 		/// <summary>
