@@ -7,30 +7,16 @@ using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
-	[Serializable]
-	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	internal class AssemblyMessageFormatter
 	{
-		[NonSerialized]
 		private static readonly int[] _installedLangs;
-
-		[NonSerialized]
 		private static readonly AssemblyMessageFormatter _defaultFormatter;
-
-		[NonSerialized]
 		private static readonly Assembly _mscorlib;
-
-		[MarshalAs(UnmanagedType.I4)]
 		private readonly int _lcid = CultureInfo.CurrentUICulture.LCID;
-
-		[NonSerialized]
 		private readonly Assembly _assembly = _mscorlib;
-
-		[NonSerialized]
 		private readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
 		public int LCID => _lcid;
-
 		public static AssemblyMessageFormatter DefaultFormatter => _defaultFormatter;
 
 		static AssemblyMessageFormatter()
