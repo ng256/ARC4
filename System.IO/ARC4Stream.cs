@@ -10,7 +10,7 @@ namespace System.IO
 	{
 		private Stream _stream;
 		private ARC4CryptoProvider _arc4;
-		private readonly bool _leaveOpen = false
+		private readonly bool _leaveOpen = false;
 		private bool _disposed = false;
 
 		/// <inheritdoc cref="Stream.CanRead"/>
