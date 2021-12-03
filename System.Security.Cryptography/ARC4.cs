@@ -30,7 +30,7 @@ namespace System.Security.Cryptography
 		}
 
 		/// <summary>
-		/// Creates a cryptographic object for executing the <see cref = "ARC4" /> algorithm using the random parameters.
+		/// Creates a cryptographic object for executing the <see cref = "ARC4" /> algorithm using random parameters.
 		/// </summary> 
 		public new static ARC4 Create()
 		{
