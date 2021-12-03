@@ -53,15 +53,16 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("iv");
 			}
-			if (iv.Distinct().Count() != 256)
+			if (!ARC4SBlock.ValidBytes(iv))
 			{
 				throw new ArgumentException(null, "iv");
 			}
-			KeyValue = new byte[key.Length];
+			int keyLength = key.Length;
+			KeyValue = new byte[keyLength];
 			KeySizeValue = key.Length * 8;
-			Array.Copy(key, KeyValue, key.Length);
-			IVValue = new byte[iv.Length];
-			Array.Copy(iv, IVValue, iv.Length);
+			Array.Copy(key, KeyValue, keyLength);
+			IVValue = new byte[IVSizeValue];
+			Array.Copy(iv, IVValue, IVSizeValue);
 			BlockSizeValue = 8;
 			FeedbackSizeValue = 8;
 			LegalBlockSizesValue = new KeySizes[1]
@@ -80,8 +81,10 @@ namespace System.Security.Cryptography
 		/// Initializes a new object <see cref = "ARC4Managed" /> using the specified parameters.
 		/// </summary>
 		/// <param name = "key"> Encryption key. </param>
-		/// <param name = "iv"> Initialization vector. </param> 
-		public ARC4Managed(byte[] key, ARC4SBlock[] iv)
+		/// <param name = "sblock">
+		/// <see cref = "ARC4SBlock" /> used as the initial state of the ARC4 algorithm.
+		/// </param> 
+		public ARC4Managed(byte[] key, ARC4SBlock[] sblock)
 		{
 			if (key == null)
 			{
@@ -91,19 +94,16 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentException(null, "key");
 			}
-			if (iv == null)
+			if (sblock == null)
 			{
-				throw new ArgumentNullException("iv");
+				throw new ArgumentNullException("sblock");
 			}
-			if (iv.Length != 256)
-			{
-				throw new ArgumentException(null, "iv");
-			}
-			KeyValue = new byte[key.Length];
+			int keyLength = key.Length;
+			KeyValue = new byte[keyLength];
 			KeySizeValue = key.Length * 8;
-			Array.Copy(key, KeyValue, key.Length);
-			IVValue = new byte[iv.Length];
-			Array.Copy(iv, IVValue, iv.Length);
+			Array.Copy(key, KeyValue, keyLength);
+			IVValue = new byte[IVSizeValue];
+			Array.Copy(sblock, IVValue, IVSizeValue);
 			BlockSizeValue = 8;
 			FeedbackSizeValue = 8;
 			LegalBlockSizesValue = new KeySizes[1]
