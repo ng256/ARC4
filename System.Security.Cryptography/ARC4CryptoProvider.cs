@@ -22,11 +22,11 @@ namespace System.Security.Cryptography
 			array[index2] = b;
 		}
 
-		/ * Pseudo-random number generator
+		/* Pseudo-random number generator
 		    To generate the keystream, the cipher uses a hidden internal state, which consists of two parts:
 		    - A permutation containing all possible bytes from 0x00 to 0xFF (array _sblock).
 		    - Variables-counters x and y.
-		* / 
+		*/ 
 		private byte NextByte() // PRGA
 		{
 			x = (x + 1) % 256;
