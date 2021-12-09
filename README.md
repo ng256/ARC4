@@ -19,7 +19,7 @@ void CreateSBlock()
 {
     for (int i = 0; i < 256; i++)
     {
-        sblock[i] = (byte)i; // S-Block initialization.
+        sblock[i] = (byte)i; // S-block initialization.
     }
 }
 void KeyScheduling() (byte[] key) // KSA
@@ -37,47 +37,92 @@ void KeyScheduling() (byte[] key) // KSA
 
 The essence of LCR method is to calculate a sequence of random numbers X[i], setting
 
-X[i+1] = (A • X [i] + C) MOD M, where:
+X[i+1] = (A • X[i] + C) MOD M, where:
 
 - **M** is the modulus, (a natural number M ≥ 2 relative to which it calculates the remainder of the division);
 - **A** is the factor (0 ≤ A < M);
 - **C** is the increment (0 ≤ C < M);
-- **X[0]** is the initial value 0 ≤ X[0] <M;
-- index **i** in our case is within 0 ≤ i < 256.
+- **X[0]** is the initial value 0 ≤ X[0] < M;
+- index **i** changes sequentially within 0 ≤ i < M.
 
-Thus, LCR creates a sequence of 256 non-duplicate pseudo-random values.
+Thus, LCR creates a sequence of M non-duplicate pseudo-random values only when:
+- the numbers **С** and **M** are coprime;
+- **B** = A - 1 multiple of **P** for every prime **P** that divides **M**;
+- **B** is a multiple of 4 if **M** is a multiple of 4.
+
+For optimization in our case it is precalculated that:
+M = 256,
+X ∈ (0, 256),
+A ∈ (9, 249) and A - 1 can be devided by 4,
+C ∈ (5, 251) and C is a prime number.
+The upper bound for the number of distinct S-blocks that can be obtained using the folowing method is about 200 million values.  
+
 ```csharp
+byte[] _A = // An array of all values that A.
+{
+    0x09, 0x0D, 0x11, 0x15, 0x19, 0x1D, 0x21, 0x25,
+    0x29, 0x2D, 0x31, 0x35, 0x39, 0x3D, 0x41, 0x45,
+    0x49, 0x4D, 0x51, 0x55, 0x59, 0x5D, 0x61, 0x65,
+    0x69, 0x6D, 0x71, 0x75, 0x79, 0x7D, 0x81, 0x85,
+    0x89, 0x8D, 0x91, 0x95, 0x99, 0x9D, 0xA1, 0xA5,
+    0xA9, 0xAD, 0xB1, 0xB5, 0xB9, 0xBD, 0xC1, 0xC5,
+    0xC9, 0xCD, 0xD1, 0xD5, 0xD9, 0xDD, 0xE1, 0xE5,
+    0xE9, 0xED, 0xF1, 0xF5, 0xF9
+};
+byte[] _C = // An array of all values that C.
+{
+    0x05, 0x07, 0x0B, 0x0D, 0x11, 0x13, 0x17, 0x1D,
+    0x1F, 0x25, 0x29, 0x2B, 0x2F, 0x35, 0x3B, 0x3D,
+    0x43, 0x47, 0x49, 0x4F, 0x53, 0x59, 0x61, 0x65,
+    0x67, 0x6B, 0x6D, 0x71, 0x7F, 0x83, 0x89, 0x8B,
+    0x95, 0x97, 0x9D, 0xA3, 0xA7, 0xAD, 0xB3, 0xB5,
+    0xBF, 0xC1, 0xC5, 0xC7, 0xD3, 0xDF, 0xE3, 0xE5,
+    0xE9, 0xEF, 0xF1, 0xFB
+};
 void CreateRandomSBlock()
 {
     using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
     {
         byte[] random = new byte[4];
         rng.GetBytes(random);
-        // For optimization it is calculated that:
-        // x ∈ (0, 256),
-        // a ∈ (5, 246),
-        // c = 17,
-        // m = 256.
-        int x = BitConverter.ToInt32(random, 0) % 256;
-        int a = 2;
-        const int c = 17;
-        const int m = 256;
-        while ((a - 1) % 4 != 0)
-        {
-            random = new byte[4];
-            rng.GetBytes(random);
-            int rnd = BitConverter.ToInt32(random, 0);
-            a = 5 + rnd % 246;
-        }
+        int r = random[0];
+        int x = random[1];
+        int a = _A[random[2] % _A.Length];
+        int c = _C[random[3] % _C.Length];
+        int m = 256;
         for (int i = 0; i < m; i++)
         {
-            sblock[i] = (byte)(x = (a * x + c) % m); // S-Block initialization.
+            sblock[i] = (byte) (r ^ (x = (a * x + c) % m));
         }
     }
 }
 ```
+If you want to use your own S-block, it must be function **ValidBytes** tested.  
+```csharp
+bool ValidBytes(byte[] bytes) // Checking that all 256 values should not be duplicated.
+{
+    if (bytes == null || bytes.Length != 256)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < 256; i++)
+    {
+        for (int j = i + 1; j < 256; j++)
+        {
+            if (bytes[i] == bytes[j])
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+```
+
 ### Generating a pseudo-random word K.
-This part of the algorithm is called the pseudo-random generation algorithm (PRGA). The RC4 keystream generator permutes the values stored in S-block. In one RC4 cycle, one n-bit K word from the keystream is determined. In the future, the keyword will be added modulo two with the original text that the user wants to encrypt, and the encrypted text will be obtained.
+This part of the algorithm is called the pseudo-random generation algorithm (PRGA). The ARC4 keystream generator permutes the values stored in S-block. In one ARC4 cycle, one n-bit K word from the keystream is determined. In the future, the keyword will be added modulo two with the original text that the user wants to encrypt, and the encrypted text will be obtained.
 ```csharp
 int x = 0, y = 0;
 void Swap(byte[] array, int index1, int index2)
@@ -94,26 +139,27 @@ byte NextByte() // PRGA
     return sblock[(sblock[x] + sblock[y]) % 256];
 }
 ```
+### Cipher algorithm.
 
-### Encryption algorithm.
-The function generates a sequence of bits Ki.
-The bit sequence is then combined with the plaintext Mi by a modulo two (xor) operation. The result is a cipher code Ci: 
+#### Encryption.
+The function generates a sequence of bits K[i].
+The bit sequence is then combined with the plaintext Mi by a modulo two (xor) operation. The result is a cipher code C[i]: 
 
-- Ci = Mi ⊕ Ki.
+- C[i] = M[i] ⊕ K[i].
 
-### Decryption algorithm.
+#### Decryption.
 The key bitstream (keystream) Ki is re-created (regenerated).
-The bitstream of the key is added with the cipher Ci operation "xor". Due to the properties of the operation "xor", the output is the original (unencrypted) text Mi: 
+The bitstream of the key is added with the cipher C[i] operation "XOR" (⊕). Due to the properties of the operation "XOR", the output is the original (unencrypted) text M[i]: 
 
-- Mi = Ci ⊕ Ki = ( Mi ⊕ Ki ) ⊕ Ki
+- M[i] = C[i] ⊕ K[i] = ( M[i] ⊕ K[i] ) ⊕ K[i]
 
+Function Cipher performs symmetric encryption and decryption using the ARC4 algorithm.
 ```csharp
-// Performs symmetric encryption and decryption using the ARC4 algorithm.
 void Cipher(byte[] buffer, int offset, int count)
 {
     for (int i = offset; i < count; i++)
     {
-        buffer[i] = (byte)(buffer[i] ^ NextByte());
+        buffer[i] = unchecked((byte)(buffer[i] ^ NextByte()));
     }
 }
 ```
@@ -142,12 +188,12 @@ byte[] data = Encoding.UTF8.GetBytes("secret");
 byte[] encrypted, restored;
 using (var arc4 = ARC4.Create(password, ARC4SBlock.DefaultSBlock))
 {
-    using(var transform = arc4.CreateEncryptor())
+    using(var transform = arc4.CreateEncryptor()) // Encryption.
     {
         encrypted = transform.TransformFinalBlock(data, 0, data.Length);
     }
 
-    using(var transform = arc4.CreateDecryptor())
+    using(var transform = arc4.CreateDecryptor()) // Decryption.
     {
         restored = transform.TransformFinalBlock(data, 0, data.Length);
     }
@@ -162,15 +208,17 @@ string password = "password";
 string data = "secret";
 string restored;
 using (var memory = new MemoryStream())
-{
+{ 
+    // Encryption.
     using (var stream = new ARC4Stream(memory, password, ARC4SBlock.DefaultSBlock))
-    {
+    { 
         using (StreamWriter writer = new StreamWriter(stream))
         {
             writer.Write(data);
         }
     }
-    memory.Seek(0, SeekOrigin.Begin);
+    memory.Seek(0, SeekOrigin.Begin); // Reset the memory position to start.
+    // Decryption.
     using (var stream = new ARC4Stream(memory, password, ARC4SBlock.DefaultSBlock))
     {
         using (StreamReader reader = new StreamReader(stream))
