@@ -48,7 +48,7 @@ namespace System.Security.Cryptography
 		{
 			byte[] bytes = new byte[256];
 			byte[] random = new byte[4];
-			rng.GetBytes(random);
+			CryptoProvider.InternalRng.GetBytes(random);
 			int r = random[0];
 			int x = random[1];
 			int a = _A[random[2] % _A.Length];
