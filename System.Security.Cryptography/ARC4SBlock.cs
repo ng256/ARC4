@@ -65,7 +65,7 @@ namespace System.Security.Cryptography
 			}
 			for (int i = 0; i < 256; i++)
 			{
-				for (int j = i; j < 256; j++)
+				for (int j = i + 1; j < 256; j++)
 				{
 					if (bytes[i] == bytes[j])
 					{
