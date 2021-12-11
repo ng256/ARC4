@@ -1,4 +1,10 @@
-0. [Library contents](#Library-contents)
+# Contents.
+0. [Library contents.](#Library-contents)
+1. [Usage.](#Usage)
+2. [How it works.](#How-it-works)
+    1. [S-box initialization.](#S-box-initialization)
+    2. [Linear congruential random.](#Linear-congruential-random)
+    3. [Generating a pseudo-random word K](#Generating-a-pseudo-random-word-K)
 
 # Description.  
 The ARC4 Cryptography Provider Class Library is a DLL file for .NET projects that includes an implementation of a well-known symmetric encryption algorithm that is not present in the System.Security.Cryptography namespace of the mscorlib library.
