@@ -119,7 +119,7 @@ void KeyScheduling() (byte[] key) // KSA
 }
 ```
 
-</deatails>
+</details>
 
 ### Using custom S-block.  
 
