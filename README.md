@@ -89,8 +89,6 @@ using (var memory = new MemoryStream())
 }
 ```
 
-[↑ Back to contents.](#contents)
-
 ## How it works.  
 
 The core of the stream cipher algorithm consists of a function - a pseudo-random bit (gamma) generator, which produces a key bit stream (key stream, gamma, pseudo-random bit sequence). 
@@ -246,8 +244,6 @@ byte NextByte() // PRGA
     return sblock[(sblock[x] + sblock[y]) % 256];
 }
 ```
-
-[↑ Back to contents.](#contents)
     
 ### Cipher algorithm.  
 
@@ -276,4 +272,6 @@ void Cipher(byte[] buffer, int offset, int count)
     }
 }
 ```
+
+________
 [↑ Back to contents.](#contents)
