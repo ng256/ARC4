@@ -89,6 +89,8 @@ using (var memory = new MemoryStream())
 }
 ```
 
+[↑ Back to contents.](#contents)
+
 ## How it works.  
 
 The core of the stream cipher algorithm consists of a function - a pseudo-random bit (gamma) generator, which produces a key bit stream (key stream, gamma, pseudo-random bit sequence). 
@@ -222,7 +224,7 @@ bool ValidBytes(byte[] bytes)
 ```
 
 </details>
-
+    
 ### Generating a pseudo-random word K.  
 This part of the algorithm is called the pseudo-random generation algorithm (**PRGA**). The ARC4 keystream generator permutes the values stored in S-block. In one ARC4 cycle, one n-bit K word from the keystream is determined. In the future, the keyword will be added modulo two with the original text that the user wants to encrypt, and the encrypted text will be obtained.  
 
@@ -245,6 +247,8 @@ byte NextByte() // PRGA
 }
 ```
 
+[↑ Back to contents.](#contents)
+    
 ### Cipher algorithm.  
 
 #### Encryption.  
