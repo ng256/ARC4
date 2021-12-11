@@ -1,12 +1,3 @@
-# Contents.
-0. [Library contents.](#library-contents)
-1. [Usage.](#usage)
-2. [How it works.](#how-it-works)
-    - [S-box initialization.](#s-box-initialization)
-    - [Linear congruential random.](#linear-congruential-random)
-    - [Generating a pseudo-random word K](#generating-a-pseudo-random-word-K)
-    - [Cipher algorithm.](#cipher-algorithm)
-
 # Description.  
 The ARC4 Cryptography Provider Class Library is a DLL file for .NET projects that includes an implementation of a well-known symmetric encryption algorithm that is not present in the System.Security.Cryptography namespace of the mscorlib library.
 
@@ -16,6 +7,15 @@ The original RC4 stream cipher was created by Ronald Rivest of RSA Security. For
 To avoid potential claims from the trademark owner, the cipher is sometimes referred to as ARC4, meaning to alleged RC4 (since RSA Security did not officially release the algorithm).
 
 Despite the fact that this cipher is not recommended, ARC4 remains popular due to its simplicity of software implementation and high speed of operation. Another important advantage is the variable key length and the same amount of encrypted and original data. 
+
+## Contents.
+0. [Library contents.](#library-contents)
+1. [Usage.](#usage)
+2. [How it works.](#how-it-works)
+    - [S-block initialization.](#s-block-initialization)
+    - [Using custom S-block.](#using-custom-s-block)
+    - [Generating a pseudo-random word K](#generating-a-pseudo-random-word-k)
+    - [Cipher algorithm.](#cipher-algorithm)
 
 ## Library contents.  
 
@@ -93,9 +93,9 @@ using (var memory = new MemoryStream())
 
 The core of the stream cipher algorithm consists of a function - a pseudo-random bit (gamma) generator, which produces a key bit stream (key stream, gamma, pseudo-random bit sequence). 
 
-### S-box initialization.  
+### S-block initialization.  
 
-The algorithm is also known as the key-scheduling algorithm (**KSA**). This algorithm uses a key entered by the user, stored in Key, and has a length of L bytes. Initialization begins with filling the array (**S-block**), then this array is shuffled by permutations defined by the key. Since only one action is performed on S-block, the statement must be made that S-block always contains one set of values that was given during the initial initialization: (S[i] = i). The user can also enter his own version of the S-block using the initialization vector or generate a pseudo-random S-block.  
+The algorithm is also known as the key-scheduling algorithm (**KSA**). This algorithm uses a key entered by the user, stored in Key, and has a length of L bytes. Initialization begins with filling the array (**S-block**), then this array is shuffled by permutations defined by the key. Since only one action is performed on S-block, the statement must be made that S-block always contains one set of values that was given during initialization: S[i] = i. The user can also enter his own version of the S-block using the initialization vector or generate a pseudo-random S-block (see next paragraph about it).    
 
 ```csharp
 byte[] sblock = new byte[256]; // The array contained S-block.
@@ -117,12 +117,12 @@ void KeyScheduling() (byte[] key) // KSA
 }
 ```
 
-**Attention!** By default, in this implementation the S-block is initialized with a pseudo-random byte array obtained using the linear-congruential method (**LCR**). This does not quite correspond to the classical algorithm, when the S-block was initialized with a sequence from 0 to 255. If classic behavior is required, use **ARC4SBlock.DefaultSBlock** as an initialization vector. Otherwise, you should always keep the initialization vector to prevent corruption of the decrypted data, because the encrypted data will be different each time the engine is initialized.
+### Using custom S-block.  
+
+**Attention!** By default (in this implementation) the S-box is initialized with a pseudo-random byte array obtained using the linear congruent method (**LCR**) before being passed to PGRA. This does not quite correspond to the classical algorithm, when the S-block was initialized with a sequence from 0 to 255 (S[i] = i). If classic behavior is required, use **ARC4SBlock.DefaultSBlock** as an initialization vector. Otherwise, you should always keep the initialization vector to prevent corruption of the decrypted data, because the encrypted data will be different each time the engine is initialized.  
 
 <details>
 <summary>See LCR details...</summary>
-
-### Linear congruential random.
     
 The essence of LCR method is to calculate a sequence of random numbers X[i], setting  
 
@@ -195,8 +195,7 @@ void CreateRandomSBlock()
 
 </details>
                               
-If you want to use your own S-block, it must be function **ValidBytes** tested.  
-Tihs function checks that all 256 values should not be duplicated.  
+If you want to use your own S-block, it must be function **ValidBytes** tested. Tihs function checks that all 256 values should not be duplicated.  
 
 <details>
 <summary>View code...</summary>
@@ -273,3 +272,4 @@ void Cipher(byte[] buffer, int offset, int count)
     }
 }
 ```
+[↑ Back to contents.](#contents)
