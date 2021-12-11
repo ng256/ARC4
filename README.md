@@ -97,6 +97,8 @@ The core of the stream cipher algorithm consists of a function - a pseudo-random
 
 The algorithm is also known as the key-scheduling algorithm (**KSA**). This algorithm uses a key entered by the user, stored in Key, and has a length of L bytes. Initialization begins with filling the array (**S-block**), then this array is shuffled by permutations defined by the key. Since only one action is performed on S-block, the statement must be made that S-block always contains one set of values that was given during initialization: S[i] = i. The user can also enter his own version of the S-block using the initialization vector or generate a pseudo-random S-block (see next paragraph about it).    
 
+<details><summary>View code...</summary>
+
 ```csharp
 byte[] sblock = new byte[256]; // The array contained S-block.
 void CreateSBlock()
@@ -117,12 +119,13 @@ void KeyScheduling() (byte[] key) // KSA
 }
 ```
 
+</deatails>
+
 ### Using custom S-block.  
 
 **Attention!** By default (in this implementation) the S-box is initialized with a pseudo-random byte array obtained using the linear congruent method (**LCR**) before being passed to PGRA. This does not quite correspond to the classical algorithm, when the S-block was initialized with a sequence from 0 to 255 (S[i] = i). If classic behavior is required, use **ARC4SBlock.DefaultSBlock** as an initialization vector. Otherwise, you should always keep the initialization vector to prevent corruption of the decrypted data, because the encrypted data will be different each time the engine is initialized.  
 
-<details>
-<summary>See LCR details...</summary>
+<details><summary>See LCR details...</summary>
     
 The essence of LCR method is to calculate a sequence of random numbers X[i], setting  
 
@@ -197,8 +200,7 @@ void CreateRandomSBlock()
                               
 If you want to use your own S-block, it must be function **ValidBytes** tested. Tihs function checks that all 256 values should not be duplicated.  
 
-<details>
-<summary>View code...</summary>
+<details><summary>View code...</summary>
 
 ```csharp
 bool ValidBytes(byte[] bytes)
@@ -228,6 +230,8 @@ This part of the algorithm is called the pseudo-random generation algorithm (**P
 
 The **NextByte** function performs PRGA transformation and returns word K.  
 
+<details><summary>View code...</summary>
+
 ```csharp
 int x = 0, y = 0;
 void Swap(byte[] array, int index1, int index2)
@@ -244,6 +248,8 @@ byte NextByte() // PRGA
     return sblock[(sblock[x] + sblock[y]) % 256];
 }
 ```
+
+</details>
     
 ### Cipher algorithm.  
 
@@ -263,6 +269,8 @@ The bitstream of the key is added with the cipher C[i] operation "XOR" (⊕). Du
 
 The **Cipher** function performs symmetric encryption and decryption using the ARC4 algorithm.  
 
+<details><summary>View code...</summary>
+
 ```csharp
 void Cipher(byte[] buffer, int offset, int count)
 {
@@ -272,6 +280,8 @@ void Cipher(byte[] buffer, int offset, int count)
     }
 }
 ```
+
+</details>
 
 ________
 [↑ Back to contents.](#contents)
