@@ -1,130 +1,267 @@
-using System.ComponentModel;
+using static System.ComponentModel.AssemblyMessageFormatter;
 using System.Text;
 
 namespace System.Security.Cryptography
 {
-	/// <summary>
-	/// Implements the function of generating a key based on a password using a pseudo-random number generator 
-	/// <see cref = "System.Security.Cryptography.ARC4" />.
-	/// </summary> 
-	public class ARC4DeriveBytes : DeriveBytes
+    /// <summary>
+    ///     Implements the function of generating a key based on a password and salt
+    ///     using a pseudo-random number generator <see cref = "ARC4" />.
+    ///     This class could not be inherited.
+    /// </summary> 
+    public sealed class ARC4DeriveBytes : DeriveBytes
 	{
 		private ARC4CryptoProvider _arc4;
-		private byte[] _key;
-		private byte[] _iv;
+        private byte[] _key;
+		private byte[] _salt;
 		private bool _disposed = false;
 
-		/// <summary>
-		/// Current internal state of the algorithm <see cref = "ARC4" />.
-		/// </summary> 
-		public ARC4SBlock State => _arc4.State;
+        /// <summary>
+        ///     Current internal state of the algorithm <see cref = "ARC4" />.
+        /// </summary> 
+        /// <exception cref="ObjectDisposedException">
+        ///     Thrown if current instance of <see cref="ARC4DeriveBytes"/> is disposed.
+        /// </exception> 
+		public ARC4SBlock State
+        {
+            get
+            {
+                if (_disposed)
+                {
+                    throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
+                        DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
+                }
 
-		/// <summary>
-		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />, using the specified parameters.
-		/// </summary>
-		/// <param name = "key"> Encryption key. </param>
-		/// <param name = "iv"> Initialization vector. </param> 
-		public ARC4DeriveBytes(byte[] key, byte[] iv = null)
+                return _arc4.State;
+            }
+        }
+
+        /// <summary>
+        ///     Gets or sets the key salt.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     Thrown if current instance of <see cref="ARC4DeriveBytes"/> is disposed.
+        /// </exception> 
+        public byte[] Salt
+        {
+            get
+            {
+                if (_disposed)
+                {
+                    throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
+                        DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
+                }
+
+                return _salt;
+            }
+            set
+            {
+                if (value.Length < 4)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value.Length,
+                        DefaultFormatter.FormatMessage("Argument_InvalidArrayLength", 4));
+                }
+                _salt = value;
+                Reset();
+            }
+        }
+
+        /// <summary>
+        ///     Initializes a new instance <see cref = "ARC4DeriveBytes" />
+        ///     using the specified <paramref name="key"/>.
+        /// </summary>
+        /// <param name = "key">
+        ///     The secret key to be used for the <see cref="ARC4"/> algorithm.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if the <paramref name="key"/> parameter is <see langword="null"/>.
+        /// </exception> 
+        public ARC4DeriveBytes(byte[] key)
 		{
-			_key = key;
-			_iv = iv ?? ((byte[])ARC4SBlock.DefaultSBlock);
-			if (!ARC4SBlock.ValidBytes(iv))
-			{
-				throw new ArgumentException(AssemblyMessageFormatter.DefaultFormatter.GetMessage("Cryptography_InvalidIVSize"), "iv");
-			}
-			_arc4 = ((iv == null || iv.Length == 0) ? new ARC4CryptoProvider(_key) : new ARC4CryptoProvider(_key, _iv));
+            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _salt = new byte[4];
+            CryptoProvider.InternalRng.GetBytes(_salt);
+            Reset();
 		}
 
-		/// <summary>
-		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />, using the specified parameters.
-		/// </summary>
-		/// <param name = "key"> Encryption key. </param>
-		/// <param name = "sblock">
-		/// <see cref = "ARC4SBlock" /> used as the initial state of the ARC4 algorithm.
-		/// </param> 
-		public ARC4DeriveBytes(byte[] key, ARC4SBlock sblock)
+        /// <summary>
+        ///     Initializes a new instance <see cref = "ARC4DeriveBytes" />
+        ///     using the specified <paramref name="key"/> and <paramref name="salt"/>.
+        /// </summary>
+        /// <param name = "key">
+        ///     The secret key to be used for the <see cref="ARC4"/> algorithm.
+        /// </param>
+        /// <param name = "salt">
+        ///     Key salt. It must contain at least 4 bytes.
+        /// </param> 
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown if less than 4 bytes of salt is passed.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if one of the required arguments is <see langword="null"/>.
+        /// </exception> 
+        public ARC4DeriveBytes(byte[] key, params byte[] salt)
 		{
-			_key = key;
-			_iv = sblock ?? ARC4SBlock.DefaultSBlock;
-			_arc4 = new ARC4CryptoProvider(_key, sblock ?? ARC4SBlock.DefaultSBlock);
+            if (salt == null) throw new ArgumentNullException(nameof(salt));
+            if (salt.Length < 4) throw new ArgumentOutOfRangeException(nameof(salt), salt.Length, 
+                DefaultFormatter.FormatMessage("Argument_InvalidArrayLength", 4));
+
+            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _salt = salt;
+            Reset();
 		}
 
-		/// <summary>
-		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />, using the specified parameters.
-		/// </summary>
-		/// <param name = "password"> Password. </param>
-		/// <param name = "encoding"> Character encoding for password conversion. </param>
-		/// <param name = "iv"> Initialization vector. </param> 
-		public ARC4DeriveBytes(string password, Encoding encoding = null, byte[] iv = null)
+        /// <summary>
+        ///     Initializes a new instance <see cref = "ARC4DeriveBytes" />
+        ///     using the specified <paramref name="password"/> and <paramref name="salt"/>.
+        /// </summary>
+        /// <param name = "password">
+        ///     A string containing the secret password used for the <see cref="ARC4"/> algorithm.
+        /// </param>
+        /// <param name = "encoding">
+        ///     Character encoding for password to bytes conversion.
+        /// </param>
+        /// <param name = "salt">
+        ///     Key salt. It must contain at least 4 bytes.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown if less than 4 bytes of salt is passed.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if one of the required arguments is <see langword="null"/>.
+        /// </exception> 
+        public ARC4DeriveBytes(string password, Encoding encoding, params byte[] salt)
 		{
-			_key = (encoding ?? Encoding.UTF8).GetBytes(password);
-			_iv = iv ?? ((byte[])ARC4SBlock.DefaultSBlock);
-			if (!ARC4SBlock.ValidBytes(iv))
-			{
-				throw new ArgumentException(AssemblyMessageFormatter.DefaultFormatter.GetMessage("Cryptography_InvalidIVSize"), "iv");
-			}
-			_arc4 = ((iv == null || iv.Length == 0) ? new ARC4CryptoProvider(_key) : new ARC4CryptoProvider(_key, _iv));
-		}
+            if (password == null) throw new ArgumentNullException(nameof(password));
+            if (encoding == null) throw new ArgumentNullException(nameof(encoding));
+            if (salt == null) throw new ArgumentNullException(nameof(salt));
+            if (salt.Length < 4) throw new ArgumentOutOfRangeException(nameof(salt), salt.Length,
+                DefaultFormatter.FormatMessage("Argument_InvalidArrayLength", 4));
 
-		/// <summary>
-		/// Initializes a new instance <see cref = "ARC4DeriveBytes" />, using the specified parameters.
-		/// </summary>
-		/// <param name = "password"> Password. </param>
-		/// <param name = "encoding"> Character encoding for password conversion. </param>
-		/// <param name = "sblock">
-		/// <see cref = "ARC4SBlock" /> used as the initial state of the ARC4 algorithm.
-		/// </param> 
-		public ARC4DeriveBytes(string password, Encoding encoding = null, ARC4SBlock sblock = null)
+            _key = encoding.GetBytes(password);
+            _salt = salt;
+            Reset();
+        }
+
+        /// <summary>
+        ///     Initializes a new instance <see cref = "ARC4DeriveBytes" />
+        ///     using the specified <paramref name="password"/>.
+        /// </summary>
+        /// <param name = "password">
+        ///     A string containing the secret password used for the <see cref="ARC4"/> algorithm.
+        /// </param>
+        /// <param name = "encoding">
+        ///     Character encoding for password to bytes conversion.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if one of the required arguments is <see langword="null"/>.
+        /// </exception> 
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown if less than 4 bytes of salt is passed.
+        /// </exception>
+        public ARC4DeriveBytes(string password, Encoding encoding)
 		{
-			_key = (encoding ?? Encoding.UTF8).GetBytes(password);
-			_iv = sblock ?? ARC4SBlock.DefaultSBlock;
-			_arc4 = new ARC4CryptoProvider(_key, sblock ?? ARC4SBlock.DefaultSBlock);
-		}
-		
-		/// <inheritdoc cref="DeriveBytes.GetBytes"/>
-		public override byte[] GetBytes(int cb)
+            if (password == null) throw new ArgumentNullException(nameof(password));
+            if (encoding == null) throw new ArgumentNullException(nameof(encoding));
+
+            _key = encoding.GetBytes(password);
+            _salt = new byte[4];
+            CryptoProvider.InternalRng.GetBytes(_salt);
+            Reset();
+        }
+
+        /// <summary>
+        ///     Initializes a new instance <see cref = "ARC4DeriveBytes" />
+        ///     using the specified <paramref name="password"/> and <paramref name="salt"/>.
+        /// </summary>
+        /// <param name = "password">
+        ///     A string containing the secret password used for the <see cref="ARC4"/> algorithm.
+        /// </param>
+        /// <param name = "salt">
+        ///     Key salt. It must contain at least 4 bytes.
+        /// </param> 
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown if less than 4 bytes of salt is passed.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if one of the required arguments is <see langword="null"/>.
+        /// </exception> 
+        public ARC4DeriveBytes(string password, params byte[] salt) : this(password, Encoding.UTF8, salt)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance <see cref = "ARC4DeriveBytes" />
+        ///     using the specified <paramref name="password"/>.
+        /// </summary>
+        /// <param name = "password">
+        ///     A string containing the secret password used for the <see cref="ARC4"/> algorithm.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown if the <paramref name="password"/> parameter is <see langword="null"/>.
+        /// </exception> 
+
+        public ARC4DeriveBytes(string password) : this(password, Encoding.UTF8)
+        {
+        }
+
+        /// <inheritdoc cref="DeriveBytes.GetBytes"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     Thrown if current instance of <see cref="ARC4DeriveBytes"/> is disposed.
+        /// </exception> 
+		public override unsafe byte[] GetBytes(int cb)
 		{
-			if (_arc4 == null)
-			{
-				throw new ObjectDisposedException("_arc4");
-			}
-			byte[] result = new byte[cb];
-			result.Initialize();
-			_arc4.Cipher(result, 0, result.Length);
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
+                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
+            }
+
+            byte[] result = new byte[cb];
+            int length = result.Length;
+            fixed (byte* ptr = result)
+            {
+                for (var i = 0; i < length; i++)
+                {
+                    *(ptr + i) = _arc4.NextByte();
+                }
+            }
+
 			return result;
 		}
 
-		/// <inheritdoc cref="DeriveBytes.Reset"/>
+        /// <inheritdoc cref="DeriveBytes.Reset"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     Thrown if current instance of <see cref="ARC4DeriveBytes"/> is disposed.
+        /// </exception> 
 		public override void Reset()
 		{
-			_arc4 = new ARC4CryptoProvider(_key, _iv);
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
+                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
+            }
+
+            _arc4 = new ARC4CryptoProvider(_key, ARC4SBlock.FromSalt(_salt));
 		}
 
-		/// <inheritdoc cref="DeriveBytes.Dispose(bool)"/>
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing && !_disposed)
-			{
-				try
-				{
-					CryptoProvider.EraseArray(_key);
-					CryptoProvider.EraseArray(_iv);
-					_arc4?.Dispose();
-				}
-				finally
-				{
-					_disposed = true;
-				}
-			}
-			_key = null;
-			_iv = null;
-			_arc4 = null;
-			base.Dispose(disposing);
-		}
+        /// <inheritdoc cref="DeriveBytes.Dispose(bool)"/>
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            _arc4?.EraseState();
+            _disposed = true;
+            if (!disposing) return;
+            CryptoProvider.EraseArray(ref _key);
+            CryptoProvider.EraseArray(ref _salt);
+            _arc4 = null;
+        }
 
+        /// <summary>
+        /// <inheritdoc cref="object.Finalize"/>.
+        /// </summary>
 		~ARC4DeriveBytes()
 		{
-			Dispose(disposing: false);
+            Dispose(false);
 		}
 	}
 }

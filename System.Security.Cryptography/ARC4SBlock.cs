@@ -1,14 +1,15 @@
+using static System.ComponentModel.AssemblyMessageFormatter;
 using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography
 {
 	/// <summary>
-	/// Represents the initial state of the cryptographic algorithm <see cref = "ARC4" />.
-	/// This class could not be inherited.
+	///     Represents the initial state of the cryptographic algorithm <see cref = "ARC4" />.
+	///     This class could not be inherited.
 	/// </summary> 
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential, Pack = 1, Size = 256)]
-	public sealed class ARC4SBlock : IDisposable
+	public sealed class ARC4SBlock : IDisposable, ICloneable
 	{
 		private static readonly byte[] _A =
 		{
@@ -38,36 +39,37 @@ namespace System.Security.Cryptography
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
 		private byte[] _bytes = new byte[256];
 
-		/// <summary>
-		/// Initializes an instance <see cref = "ARC4SBlock" />,
-		/// filled with pseudo-random values,
-		/// using the linear congruential random.
+        /// <summary>
+		///     Initializes an instance <see cref = "ARC4SBlock" />,
+		///     filled with pseudo-random values,
+		///     using the linear congruential random.
 		/// </summary>
-		/// <returns> Instance <see cref = "ARC4SBlock" />. </returns> 
+		/// <returns>
+		///     Instance <see cref = "ARC4SBlock" />.
+		/// </returns> 
 		public static ARC4SBlock GenerateRandom()
 		{
-			byte[] bytes = new byte[256];
-			byte[] random = new byte[4];
+            byte[] random = new byte[4];
 			CryptoProvider.InternalRng.GetBytes(random);
 			int r = random[0];
 			int x = random[1];
 			int a = _A[random[2] % _A.Length];
 			int c = _C[random[3] % _C.Length];
-			const int m = 256;
-			for (int i = 0; i < m; i++)
-			{
-				bytes[i] = (byte) (r ^ (x = (a * x + c) % m));
-			}
 
-			return new ARC4SBlock(bytes);
+            return new ARC4SBlock(x, a, c, r);
 		}
 
 		/// <summary>
-		/// Initializes an instance <see cref = "ARC4SBlock" />,
-		/// using the specified values.
+		///     Initializes an instance <see cref = "ARC4SBlock" />,
+		///     using the specified values.
 		/// </summary>
-		/// <param name = "bytes"> The initialization vector <see cref = "ARC4SBlock" />, must be filled with 256 non-duplicate values. </param>
-		/// <returns> Instance <see cref = "ARC4SBlock" />. </returns> 
+		/// <param name = "bytes">
+		///     The initialization vector <see cref = "ARC4SBlock" />,
+		///     must be filled with 256 non-duplicate values.
+		/// </param>
+		/// <returns>
+		///     Instance <see cref = "ARC4SBlock" />.
+		/// </returns> 
 		public static ARC4SBlock FromBytes(params byte[] bytes)
 		{
 			if (!ValidBytes(bytes))
@@ -78,28 +80,98 @@ namespace System.Security.Cryptography
 			return new ARC4SBlock(bytes);
 		}
 
-		internal static bool ValidBytes(byte[] bytes) // Checking that all 256 values should not be duplicated.
+        /// <summary>
+		///     Initializes an instance <see cref = "ARC4SBlock" />,
+		///     using the specified salt.
+		/// </summary>
+		/// <param name = "salt">
+		///     Salt for the LCR algorithm. It must contain at least 4 bytes.
+		/// </param>
+		/// <returns>
+		///     Instance <see cref = "ARC4SBlock" />.
+		/// </returns> 
+		public static ARC4SBlock FromSalt(params byte[] salt)
 		{
-			if (bytes == null || bytes.Length != 256)
+			if (salt.Length < 4)
 			{
-				return false;
+				throw new DuplicateWaitObjectException("bytes");
 			}
 
-			for (int i = 0; i < 256; i++)
-			{
-				for (int j = i + 1; j < 256; j++)
-				{
-					if (bytes[i] == bytes[j])
-					{
-						return false;
-					}
-				}
-			}
+            int r = salt[3];
+            int x = salt[2];
+            int a = _A[salt[1] % _A.Length];
+            int c = _C[salt[0] % _C.Length];
 
-			return true;
-		}
+            return new ARC4SBlock(x, a, c, r);
+        }
 
-		private ARC4SBlock() // Default S-Block
+        /// <summary>
+        ///     Converts <see cref="ARC4SBlock"/> to <see cref="byte"/> array.
+        /// </summary>
+        /// <param name="sblock">
+        ///     Instance <see cref="ARC4SBlock"/> for converting.
+        /// </param>
+        public static implicit operator byte[] (ARC4SBlock sblock)
+        {
+            if (sblock == null)
+            {
+                throw new ArgumentNullException(nameof(sblock));
+            }
+            if (sblock._bytes == null)
+            {
+                throw  new ObjectDisposedException(nameof(sblock),
+                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
+            }
+
+            byte[] bytes = new byte[256];
+            Array.Copy(sblock._bytes ?? DefaultSBlock._bytes, bytes, 256);
+            return bytes;
+        }
+
+        /// <summary>
+        ///     Converts <see cref="byte"/> array to <see cref="ARC4SBlock"/>.
+        /// </summary>
+        /// <param name="bytes">
+        ///     Array for converting.
+        /// </param>
+        public static explicit operator ARC4SBlock(byte[] bytes)
+        {
+            if (bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+            if (!ValidBytes(bytes))
+            {
+                throw new DuplicateWaitObjectException(nameof(bytes));
+            }
+
+            return new ARC4SBlock(bytes);
+        }
+
+        // Checks that all 256 values should not be duplicated.
+        internal static bool ValidBytes(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length != 256)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < 256; i++)
+            {
+                for (int j = i + 1; j < 256; j++)
+                {
+                    if (bytes[i] == bytes[j])
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        // Default S-Block.
+        private ARC4SBlock()
 		{
 			for (int i = 0; i < 256; i++)
 			{
@@ -107,35 +179,40 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		internal ARC4SBlock(byte[] bytes) // Specified S-Block.
+        // Specified S-Block.
+        internal ARC4SBlock(byte[] bytes)
 		{
-			_bytes = new byte[256];
-			Array.Copy(bytes, _bytes, 256);
+            Array.Copy(bytes, _bytes, 256);
 		}
 
-		public static implicit operator byte[](ARC4SBlock sblock)
-		{
-			byte[] bytes = new byte[256];
-			Array.Copy(sblock._bytes ?? DefaultSBlock._bytes, bytes, 256);
-			return bytes;
-		}
-
-		public static explicit operator ARC4SBlock(byte[] bytes)
-		{
-			if (!ValidBytes(bytes))
-			{
-				throw new DuplicateWaitObjectException(nameof(bytes));
-			}
-
-			return new ARC4SBlock(bytes);
-		}
+        // Random S-Block.
+        internal ARC4SBlock(int x, int a, int c, int r)
+        {
+            const int m = 256;
+            for (int i = 0; i < m; i++)
+            {
+                _bytes[i] = (byte)(r ^ (x = (a * x + c) % m));
+            }
+        }
 
 		/// <inheritdoc cref="IDisposable.Dispose"/>
 		public void Dispose()
-		{
-			CryptoProvider.EraseArray(_bytes);
+        {
+            if (_bytes == null) return;
+			CryptoProvider.EraseArray(ref _bytes);
 			_bytes = null;
 			GC.SuppressFinalize(this);
 		}
-	}
+
+        /// <inheritdoc cref="ICloneable.Clone"/>
+        public object Clone()
+        {
+            byte[] result = new byte[256];
+            for (int i = 0; i < 256; i++)
+            {
+                result[i] = _bytes[i];
+            }
+            return result;
+        }
+    }
 }

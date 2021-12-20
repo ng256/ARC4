@@ -52,7 +52,7 @@ namespace System.Security.Cryptography
 		/// <summary>
 		/// Creates a cryptographic object for executing the <see cref = "ARC4" /> algorithm using the specified parameters.
 		/// </summary> 
-		/// <param name = "key"> Encryption key. </param>
+		/// <param name = "key"> The secret key to be used for the symmetric algorithm. </param>
 		/// <param name = "iv"> Initialization vector. </param> 
 		public static ARC4 Create(byte[] key, byte[] iv)
 		{
@@ -62,19 +62,19 @@ namespace System.Security.Cryptography
 		/// <summary>
 		/// Creates a cryptographic object for executing the <see cref = "ARC4" /> algorithm using the specified parameters.
 		/// </summary> 
-		/// <param name = "key"> Encryption key. </param>
+		/// <param name = "key"> The secret key to be used for the symmetric algorithm. </param>
 		/// <param name = "sblock">
 		/// <see cref = "ARC4SBlock" /> used as the initial state of the ARC4 algorithm.
 		/// </param>
-		public static ARC4 Create(byte[] key, ARC4SBlock[] iv)
+		public static ARC4 Create(byte[] key, ARC4SBlock[] sblock)
 		{
-			return new ARC4Managed(key, iv);
+			return new ARC4Managed(key, sblock);
 		}
 		
 		/// <summary>
 		/// Creates a cryptographic object for executing the <see cref = "ARC4" /> algorithm using the specified parameters.
 		/// </summary> 
-		/// <param name = "key"> Encryption key. </param>
+		/// <param name = "key"> The secret key to be used for the symmetric algorithm. </param>
 		public static ARC4 Create(byte[] key)
 		{
 			return new ARC4Managed(key, ARC4SBlock.DefaultSBlock);
