@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/obj
+/ARC4LibNet90/obj
+/ARC4LibNet90/bin/Debug/net9.0
