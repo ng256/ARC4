@@ -131,27 +131,27 @@ namespace System.Security.Cryptography
         // Checks that all 256 values should not be duplicated.
         internal static unsafe bool ValidBytes(byte[] bytes)
         {
-            // Check if the length of the bytes array is equal to the sblock size.
-            const int bytesSize = 256;
-            if (bytes == null || bytes.Length != bytesSize)
+            // Ensure that length of the bytes array is equal to the sblock size.
+            if (bytes == null || bytes.Length != 256)
+            {
                 return false;
+            }
 
             fixed (byte* bytesPtr = bytes)
             {
-                const int seenSize = 8;
-                int* seenPtr = stackalloc int[seenSize];
-                for (int seenIndex = 0; seenIndex < seenSize; seenIndex++)
-                    seenPtr[seenIndex] = 0;
+                int* seenPtr = stackalloc[] { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-                for (int byteIndex = 0; byteIndex < bytesSize; byteIndex++)
+                for (int i = 0; i < 256; i++)
                 {
                     // Check if the current byte has already been seen.
-                    byte currentByte = bytesPtr[byteIndex];
+                    byte currentByte = bytesPtr[i];
                     int mask = 1 << (currentByte & 0x1F);
                     int offset = currentByte >> 5;
 
                     if ((seenPtr[offset] & mask) != 0)
+                    {
                         return false;
+                    }
 
                     // Mark the current byte as seen.
                     seenPtr[offset] |= mask;
@@ -201,10 +201,12 @@ namespace System.Security.Cryptography
         public object Clone()
         {
             byte[] result = new byte[256];
+            
             for (int i = 0; i < 256; i++)
             {
                 result[i] = _bytes[i];
             }
+            
             return result;
         }
     }
