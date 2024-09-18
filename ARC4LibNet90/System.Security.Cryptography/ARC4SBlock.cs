@@ -10,6 +10,7 @@ namespace System.Security.Cryptography
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 256)]
     public sealed class ARC4SBlock : IDisposable, ICloneable
     {
+        [NonSerialized]
         private static readonly byte[] _A =
         {
             0x09, 0x0D, 0x11, 0x15, 0x19, 0x1D, 0x21, 0x25,
@@ -22,6 +23,7 @@ namespace System.Security.Cryptography
             0xE9, 0xED, 0xF1, 0xF5, 0xF9
         };
 
+        [NonSerialized]
         private static readonly byte[] _C =
         {
             0x05, 0x07, 0x0B, 0x0D, 0x11, 0x13, 0x17, 0x1D,
@@ -33,6 +35,7 @@ namespace System.Security.Cryptography
             0xE9, 0xEF, 0xF1, 0xFB
         };
 
+        [NonSerialized]
         public static readonly ARC4SBlock DefaultSBlock = new ARC4SBlock();
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
