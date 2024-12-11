@@ -62,7 +62,7 @@ namespace System.Security.Cryptography
 					Swap(_sblock, i, j);
 				}
 
-                DropDown(256);
+                
 
             }
 			catch (Exception e)
@@ -140,7 +140,7 @@ namespace System.Security.Cryptography
 					Swap(_sblock, i, j);
 				}
 
-                DropDown(256);
+                
             }
 			catch (Exception e)
 			{
