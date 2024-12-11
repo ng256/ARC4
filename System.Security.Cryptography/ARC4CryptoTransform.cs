@@ -1,5 +1,3 @@
-using static System.ComponentModel.AssemblyMessageFormatter;
-
 namespace System.Security.Cryptography
 {
     /// <summary>
@@ -19,8 +17,7 @@ namespace System.Security.Cryptography
         /// </exception> 
         public ARC4SBlock State =>
             _disposed
-                ? throw new ObjectDisposedException(nameof(ARC4CryptoTransform),
-                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"))
+                ? throw new ObjectDisposedException(nameof(ARC4CryptoTransform), "ObjectDisposed_Generic")
                 : _arc4.State;
 
         /// <inheritdoc cref="ICryptoTransform.InputBlockSize"/>
@@ -43,11 +40,9 @@ namespace System.Security.Cryptography
         /// </param>
         public ARC4CryptoTransform(byte[] key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            if (key.Length == 0)
-                throw new ArgumentException(null, nameof(key));
-                
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentOutOfRangeException.ThrowIfZero(key.Length, nameof(key));
+
             _arc4 = new ARC4CryptoProvider(key);
         }
 
@@ -63,15 +58,14 @@ namespace System.Security.Cryptography
         /// </param> 
         public ARC4CryptoTransform(byte[] key, byte[] iv)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            if (key.Length == 0)
-                throw new ArgumentException(null, nameof(key));
-            if (iv == null)
-                throw new ArgumentNullException(nameof(iv));
-            if (!ARC4SBlock.ValidBytes(iv))
-               throw new ArgumentException(null, nameof(iv));
-               
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentOutOfRangeException.ThrowIfZero(key.Length, nameof(key));
+
+            ArgumentNullException.ThrowIfNull(iv, nameof(iv));
+            ArgumentOutOfRangeException.ThrowIfZero(iv.Length, nameof(iv));
+
+            ArgumentOutOfRangeException.ThrowIfNotEqual(ARC4SBlock.ValidBytes(iv), true, nameof(ARC4SBlock));
+
             _arc4 = new ARC4CryptoProvider(key, iv);
         }
 
@@ -88,31 +82,26 @@ namespace System.Security.Cryptography
         /// </param> 
         public ARC4CryptoTransform(byte[] key, ARC4SBlock sblock)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            if (key.Length == 0)
-                throw new ArgumentException(null, nameof(key));
-            if (sblock == null)
-                throw new ArgumentNullException(nameof(sblock));
-                
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentOutOfRangeException.ThrowIfZero(key.Length, nameof(key));
+
+            ArgumentNullException.ThrowIfNull(sblock, nameof(sblock));
+
             _arc4 = new ARC4CryptoProvider(key, sblock);
         }
 
         /// <inheritdoc cref="ICryptoTransform.TransformBlock"/>
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(ARC4CryptoTransform),
-                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
-            if (inputBuffer == null)
-                throw new ArgumentNullException(nameof(inputBuffer));
-            if (outputBuffer == null)
-                throw new ArgumentNullException(nameof(outputBuffer));
-            if (inputOffset < 0)
-                throw new ArgumentOutOfRangeException(nameof(inputOffset), inputOffset, null);
-            if (inputCount <= 0 || inputCount % InputBlockSize != 0 || inputCount > inputBuffer.Length || inputBuffer.Length - inputCount < inputOffset)
-                throw new ArgumentException(null, nameof(inputCount));
-                
+            ObjectDisposedException.ThrowIf(_disposed, typeof(ARC4CryptoTransform));
+            ArgumentNullException.ThrowIfNull(inputBuffer, nameof(inputBuffer));
+            ArgumentNullException.ThrowIfNull(outputBuffer, nameof(outputBuffer));
+            ArgumentOutOfRangeException.ThrowIfLessThan(inputOffset, 0, nameof(inputOffset));
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(inputCount, 0, nameof(inputCount));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(inputCount % InputBlockSize, 0, nameof(inputCount));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(inputCount, inputBuffer.Length, nameof(inputCount));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(inputBuffer.Length - inputCount, inputOffset, nameof(inputCount));
+
             Array.Copy(inputBuffer, inputOffset, outputBuffer, outputOffset, inputCount);
             _arc4.Cipher(outputBuffer, outputOffset, inputCount);
             return inputCount;
@@ -121,16 +110,13 @@ namespace System.Security.Cryptography
         /// <inheritdoc cref="ICryptoTransform.TransformFinalBlock"/>
         public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(ARC4CryptoTransform),
-                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
-            if (inputBuffer == null)
-                throw new ArgumentNullException(nameof(inputBuffer));
-            if (inputOffset < 0)
-                throw new ArgumentOutOfRangeException(nameof(inputOffset), inputOffset, null);
-            if (inputCount < 0 || inputCount > inputBuffer.Length || inputBuffer.Length - inputCount < inputOffset)
-                throw new ArgumentException(null, nameof(inputCount));
-                
+            ObjectDisposedException.ThrowIf(_disposed, typeof(ARC4CryptoTransform));
+            ArgumentNullException.ThrowIfNull(inputBuffer, nameof(inputBuffer));
+            ArgumentOutOfRangeException.ThrowIfLessThan(inputOffset, 0, nameof(inputOffset));
+            ArgumentOutOfRangeException.ThrowIfLessThan(inputCount, 0, nameof(inputCount));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(inputCount, inputBuffer.Length, nameof(inputCount));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(inputBuffer.Length - inputCount, inputOffset, nameof(inputCount));
+
             byte[] outputBuffer = new byte[inputCount];
             Array.Copy(inputBuffer, inputOffset, outputBuffer, 0, inputCount);
             _arc4.Cipher(outputBuffer, 0, inputCount);
@@ -153,9 +139,7 @@ namespace System.Security.Cryptography
         /// </exception> 
         public void Reset(byte[] key, ARC4SBlock sblock)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(ARC4CryptoTransform),
-                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
+            ObjectDisposedException.ThrowIf(_disposed, typeof(ARC4CryptoTransform));
 
             _arc4 = new ARC4CryptoProvider(key, sblock);
         }

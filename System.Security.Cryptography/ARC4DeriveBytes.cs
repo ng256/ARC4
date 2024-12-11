@@ -1,4 +1,3 @@
-using static System.ComponentModel.AssemblyMessageFormatter;
 using System.Text;
 
 namespace System.Security.Cryptography
@@ -25,12 +24,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
-                        DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
-                }
-
+                ObjectDisposedException.ThrowIf(_disposed, typeof(ARC4DeriveBytes));
                 return _arc4.State;
             }
         }
@@ -41,25 +35,19 @@ namespace System.Security.Cryptography
         /// <exception cref="ObjectDisposedException">
         ///     Thrown if current instance of <see cref="ARC4DeriveBytes"/> is disposed.
         /// </exception> 
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown if current size of <see langword="value"/> less than 4.
+        /// </exception> 
         public byte[] Salt
         {
             get
             {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
-                        DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
-                }
-
+                ObjectDisposedException.ThrowIf(_disposed, typeof(ARC4DeriveBytes));
                 return _salt;
             }
             set
             {
-                if (value.Length < 4)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), value.Length,
-                        DefaultFormatter.FormatMessage("Argument_InvalidArrayLength", 4));
-                }
+                ArgumentOutOfRangeException.ThrowIfLessThan(value.Length, 4, nameof(value));
                 _salt = value;
                 Reset();
             }
@@ -77,7 +65,9 @@ namespace System.Security.Cryptography
         /// </exception> 
         public ARC4DeriveBytes(byte[] key)
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+
+            _key = key;
             _salt = new byte[4];
             CryptoProvider.InternalRng.GetBytes(_salt);
             Reset();
@@ -101,11 +91,11 @@ namespace System.Security.Cryptography
         /// </exception> 
         public ARC4DeriveBytes(byte[] key, params byte[] salt)
         {
-            if (salt == null) throw new ArgumentNullException(nameof(salt));
-            if (salt.Length < 4) throw new ArgumentOutOfRangeException(nameof(salt), salt.Length, 
-                DefaultFormatter.FormatMessage("Argument_InvalidArrayLength", 4));
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentNullException.ThrowIfNull(salt, nameof(salt));
+            ArgumentOutOfRangeException.ThrowIfLessThan(salt.Length, 4, nameof(salt));
 
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key;
             _salt = salt;
             Reset();
         }
@@ -129,13 +119,15 @@ namespace System.Security.Cryptography
         /// <exception cref="ArgumentNullException">
         ///     Thrown if one of the required arguments is <see langword="null"/>.
         /// </exception> 
+        /// <exception cref="ArgumentException">
+        ///     Thrown if password is <see langword="null"/> or empty.
+        /// </exception> 
         public ARC4DeriveBytes(string password, Encoding encoding, params byte[] salt)
         {
-            if (password == null) throw new ArgumentNullException(nameof(password));
-            if (encoding == null) throw new ArgumentNullException(nameof(encoding));
-            if (salt == null) throw new ArgumentNullException(nameof(salt));
-            if (salt.Length < 4) throw new ArgumentOutOfRangeException(nameof(salt), salt.Length,
-                DefaultFormatter.FormatMessage("Argument_InvalidArrayLength", 4));
+            ArgumentException.ThrowIfNullOrEmpty(password, nameof(password));
+            ArgumentNullException.ThrowIfNull(encoding, nameof(encoding));
+            ArgumentNullException.ThrowIfNull(salt, nameof(salt));
+            ArgumentOutOfRangeException.ThrowIfLessThan(salt.Length, 4, nameof(salt));
 
             _key = encoding.GetBytes(password);
             _salt = salt;
@@ -160,8 +152,8 @@ namespace System.Security.Cryptography
         /// </exception>
         public ARC4DeriveBytes(string password, Encoding encoding)
         {
-            if (password == null) throw new ArgumentNullException(nameof(password));
-            if (encoding == null) throw new ArgumentNullException(nameof(encoding));
+            ArgumentException.ThrowIfNullOrEmpty(password, nameof(password));
+            ArgumentNullException.ThrowIfNull(encoding, nameof(encoding));
 
             _key = encoding.GetBytes(password);
             _salt = new byte[4];
@@ -210,11 +202,7 @@ namespace System.Security.Cryptography
         /// </exception> 
         public override unsafe byte[] GetBytes(int cb)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
-                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
-            }
+            ObjectDisposedException.ThrowIf(_disposed, typeof(ARC4DeriveBytes));
 
             byte[] result = new byte[cb];
             int length = result.Length;
@@ -235,11 +223,7 @@ namespace System.Security.Cryptography
         /// </exception> 
         public override void Reset()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
-                    DefaultFormatter.GetMessage("ObjectDisposed_Generic"));
-            }
+            ObjectDisposedException.ThrowIf(_disposed, typeof(ARC4DeriveBytes));
 
             _arc4 = new ARC4CryptoProvider(_key, ARC4SBlock.FromSalt(_salt));
         }
@@ -247,12 +231,18 @@ namespace System.Security.Cryptography
         /// <inheritdoc cref="DeriveBytes.Dispose(bool)"/>
         protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+                return;
+
             _arc4?.EraseState();
             _disposed = true;
-            if (!disposing) return;
+
+            if (!disposing)
+                return;
+
             CryptoProvider.EraseArray(ref _key);
             CryptoProvider.EraseArray(ref _salt);
+
             _arc4 = null;
         }
 

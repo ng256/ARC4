@@ -1,5 +1,3 @@
-using static System.ComponentModel.AssemblyMessageFormatter;
-
 namespace System.Security.Cryptography
 {
     // Provides methods and properties for implementing ARC4 data encryption.
@@ -20,10 +18,10 @@ namespace System.Security.Cryptography
         }
 
         /* Pseudo-random number generator
-            To generate the keystream, the cipher uses a hidden internal state, which consists of two parts:
-            - A permutation containing all possible bytes from 0x00 to 0xFF (array _sblock).
-            - Variables-counters x and y.
-        */
+		    To generate the keystream, the cipher uses a hidden internal state, which consists of two parts:
+		    - A permutation containing all possible bytes from 0x00 to 0xFF (array _sblock).
+		    - Variables-counters x and y.
+		*/
         public byte NextByte() // PRGA
         {
             x = (x + 1) % 256;
@@ -32,26 +30,13 @@ namespace System.Security.Cryptography
             return _sblock[(_sblock[x] + _sblock[y]) % 256];
         }
 
-        public void DropDown(int n)
-        {
-            for (int i = 0; i < n; i++)
-            {
-                NextByte();
-            }
-        }
-
         public ARC4CryptoProvider(byte[] key) // KSA
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentOutOfRangeException.ThrowIfZero(key.Length, nameof(key));
+
             int keyLength = key.Length;
-            if (keyLength == 0)
-            {
-                throw new ArgumentException(DefaultFormatter.FormatMessage
-                    ("Cryptography_CSP_AlgKeySizeNotAvailable", keyLength), nameof(key));
-            }
+
             try
             {
                 _sblock = ARC4SBlock.DefaultSBlock;
@@ -64,33 +49,18 @@ namespace System.Security.Cryptography
             }
             catch (Exception e)
             {
-                throw new CryptographicException(
-                    string.Format("{0} {1}",
-                        DefaultFormatter.GetMessage("Arg_CryptographyException"), e.Message), e);
+                throw new CryptographicException("Arg_CryptographyException", e);
             }
         }
 
         public ARC4CryptoProvider(byte[] key, byte[] iv)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentOutOfRangeException.ThrowIfZero(key.Length, nameof(key));
+            ArgumentNullException.ThrowIfNull(iv, nameof(iv));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(ARC4SBlock.ValidBytes(iv), true, nameof(ARC4SBlock));
             int keyLength = key.Length;
-            if (keyLength == 0)
-            {
-                throw new ArgumentException(DefaultFormatter.FormatMessage
-                    ("Cryptography_CSP_AlgKeySizeNotAvailable", keyLength), nameof(key));
-            }
-            if (iv == null)
-            {
-                throw new ArgumentNullException(nameof(iv));
-            }
-            if (!ARC4SBlock.ValidBytes(iv))
-            {
-                throw new ArgumentException(DefaultFormatter.GetMessage
-                    ("Cryptography_InvalidIVSize"), nameof(iv));
-            }
+
             try
             {
                 Array.Copy(iv, _sblock, 256);
@@ -100,28 +70,21 @@ namespace System.Security.Cryptography
                     j = (j + _sblock[i] + key[i % keyLength]) % 256;
                     Swap(_sblock, i, j);
                 }
-
-                DropDown(256);
             }
             catch (Exception e)
             {
-                throw new CryptographicException(
-                    string.Format("{0} {1}",
-                        DefaultFormatter.GetMessage("Arg_CryptographyException"), e.Message), e);
+                throw new CryptographicException("Arg_CryptographyException", e);
             }
         }
 
         public ARC4CryptoProvider(byte[] key, ARC4SBlock sblock)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentOutOfRangeException.ThrowIfZero(key.Length, nameof(key));
+            ArgumentNullException.ThrowIfNull(sblock, nameof(sblock));
+
             int keyLength = key.Length;
-            if (keyLength == 0)
-                throw new ArgumentException(DefaultFormatter.FormatMessage
-                    ("Cryptography_CSP_AlgKeySizeNotAvailable", keyLength), nameof(key));
-            if (sblock == null)
-                throw new ArgumentNullException(nameof(sblock));
-                
+
             try
             {
                 _sblock = sblock;
@@ -131,43 +94,34 @@ namespace System.Security.Cryptography
                     j = (j + _sblock[i] + key[i % keyLength]) % 256;
                     Swap(_sblock, i, j);
                 }
-
-                
             }
             catch (Exception e)
             {
-                throw new CryptographicException(string.Format("{0} {1}",
-                    DefaultFormatter.GetMessage("Arg_CryptographyException"), e.Message));
+                throw new CryptographicException("Arg_CryptographyException");
             }
         }
 
         public ARC4CryptoProvider CreateRandom(byte[] key, out byte[] iv)
         {
-            using (ARC4SBlock sblock = ARC4SBlock.GenerateRandom())
+            using (var sblock = ARC4SBlock.GenerateRandom())
             {
                 iv = sblock;
             }
             return new ARC4CryptoProvider(key, iv);
         }
 
-                // Performs symmetric encryption using the ARC4 algorithm. 
+        // Performs symmetric encryption using the ARC4 algorithm. 
         public override void Cipher(byte[] buffer, int offset, int count)
         {
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
+            ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
+            ArgumentOutOfRangeException.ThrowIfZero(buffer.Length, nameof(buffer));
 
-            int bufferLength = buffer.Length;
+            ArgumentOutOfRangeException.ThrowIfLessThan(count, 0, nameof(buffer));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(count, buffer.Length, nameof(buffer));
 
-            if (bufferLength == 0)
-                throw new ArgumentException(DefaultFormatter.GetMessage("Cryptography_InsufficientBuffer"), nameof(buffer));
+            ArgumentOutOfRangeException.ThrowIfLessThan(offset, 0, nameof(offset));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, buffer.Length - count, nameof(offset));
 
-            if (count < 0 || count > bufferLength)
-                throw new ArgumentException(DefaultFormatter.FormatMessage("ArgumentOutOfRange_ArrayLength", 0, bufferLength), nameof(count));
-
-            int length = bufferLength - count;
-
-            if (offset < 0 || offset > length)
-                throw new ArgumentException(DefaultFormatter.GetMessage("ArgumentOutOfRange_IndexOutOfRange"), nameof(offset));
 
             if (count == 0)
                 return;
@@ -181,9 +135,7 @@ namespace System.Security.Cryptography
             }
             catch (Exception e)
             {
-                throw new CryptographicException(
-                    string.Format("{0} {1}",
-                        DefaultFormatter.GetMessage("Arg_CryptographyException"), e.Message), e);
+                throw new CryptographicException("Arg_CryptographyException", e);
             }
         }
 

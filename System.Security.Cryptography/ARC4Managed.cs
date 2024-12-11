@@ -1,5 +1,3 @@
-using static System.ComponentModel.AssemblyMessageFormatter;
-
 namespace System.Security.Cryptography
 {
     /// <summary>
@@ -10,7 +8,7 @@ namespace System.Security.Cryptography
     {
         private const int KeySizeDefaultValue = 256;
         private const int IVSizeValue = 256;
-        private bool _disposed = false;
+        private readonly bool _disposed = false;
 
         /// <summary>
         ///     Initializes a new object <see cref = "ARC4Managed" /> using random parameters.
@@ -22,14 +20,8 @@ namespace System.Security.Cryptography
             KeySizeValue = KeyValue.Length * 8;
             BlockSizeValue = 8;
             FeedbackSizeValue = 8;
-            LegalBlockSizesValue = new KeySizes[]
-            {
-                new KeySizes(8, int.MaxValue, 8)
-            };
-            LegalKeySizesValue = new KeySizes[]
-            {
-                new KeySizes(8, int.MaxValue, 8)
-            };
+            LegalBlockSizesValue = [new KeySizes(8, int.MaxValue, 8)];
+            LegalKeySizesValue = [new KeySizes(8, int.MaxValue, 8)];
             ModeValue = CipherMode.CTS;
             PaddingValue = PaddingMode.None;
         }
@@ -46,26 +38,13 @@ namespace System.Security.Cryptography
         /// </param> 
         public ARC4Managed(byte[] key, byte[] iv)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-            if (key.Length == 0)
-            {
-                throw new ArgumentException(null, nameof(key));
-            }
-            if (iv == null)
-            {
-                throw new ArgumentNullException(nameof(iv));
-            }
-            if (iv.Length != IVSizeValue)
-            {
-                throw new ArgumentException(DefaultFormatter.GetMessage("Cryptography_InvalidIVSize"), nameof(iv));
-            }
-            if (!ARC4SBlock.ValidBytes(iv))
-            {
-                throw new ArgumentException(null, nameof(iv));
-            }
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentOutOfRangeException.ThrowIfZero(key.Length, nameof(key));
+
+            ArgumentNullException.ThrowIfNull(iv, nameof(iv));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(iv.Length, IVSizeValue, nameof(iv));
+
+            ArgumentOutOfRangeException.ThrowIfNotEqual(ARC4SBlock.ValidBytes(iv), true, nameof(ARC4SBlock));
 
             int keyLength = key.Length;
             KeyValue = new byte[keyLength];
@@ -75,14 +54,8 @@ namespace System.Security.Cryptography
             Array.Copy(iv, IVValue, IVSizeValue);
             BlockSizeValue = 8;
             FeedbackSizeValue = 8;
-            LegalBlockSizesValue = new KeySizes[1]
-            {
-                new KeySizes(8, int.MaxValue, 8)
-            };
-            LegalKeySizesValue = new KeySizes[1]
-            {
-                new KeySizes(8, int.MaxValue, 8)
-            };
+            LegalBlockSizesValue = [new KeySizes(8, int.MaxValue, 8)];
+            LegalKeySizesValue = [new KeySizes(8, int.MaxValue, 8)];
             ModeValue = CipherMode.CTS;
             PaddingValue = PaddingMode.None;
         }
@@ -100,20 +73,10 @@ namespace System.Security.Cryptography
         /// </param> 
         public ARC4Managed(byte[] key, ARC4SBlock[] sblock)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (key.Length == 0)
-            {
-                throw new ArgumentException(null, nameof(key));
-            }
-
-            if (sblock == null)
-            {
-                throw new ArgumentNullException(nameof(sblock));
-            }
+            ArgumentNullException.ThrowIfNull(key, nameof(key));
+            ArgumentOutOfRangeException.ThrowIfZero(key.Length, nameof(key));
+            ArgumentNullException.ThrowIfNull(sblock, nameof(sblock));
+            ArgumentOutOfRangeException.ThrowIfZero(sblock.Length, nameof(sblock));
 
             int keyLength = key.Length;
             KeyValue = new byte[keyLength];
@@ -123,14 +86,8 @@ namespace System.Security.Cryptography
             Array.Copy(sblock, IVValue, IVSizeValue);
             BlockSizeValue = 8;
             FeedbackSizeValue = 8;
-            LegalBlockSizesValue = new KeySizes[1]
-            {
-                new KeySizes(8, int.MaxValue, 8)
-            };
-            LegalKeySizesValue = new KeySizes[1]
-            {
-                new KeySizes(8, int.MaxValue, 8)
-            };
+            LegalBlockSizesValue = [new KeySizes(8, int.MaxValue, 8)];
+            LegalKeySizesValue = [new KeySizes(8, int.MaxValue, 8)];
             ModeValue = CipherMode.CTS;
             PaddingValue = PaddingMode.None;
         }
