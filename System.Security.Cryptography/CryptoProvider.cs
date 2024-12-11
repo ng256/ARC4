@@ -1,24 +1,24 @@
 namespace System.Security.Cryptography
 {
-	internal abstract class CryptoProvider
-	{
-		private static RNGCryptoServiceProvider _rng;
+    internal abstract class CryptoProvider
+    {
+        private static RNGCryptoServiceProvider _rng;
 
-		public static RNGCryptoServiceProvider InternalRng
-		{
-			get
-			{
-				if (_rng == null)
-				{
-					_rng = new RNGCryptoServiceProvider();
-				}
-				return _rng;
-			}
-		}
+        public static RNGCryptoServiceProvider InternalRng
+        {
+            get
+            {
+                if (_rng == null)
+                {
+                    _rng = new RNGCryptoServiceProvider();
+                }
+                return _rng;
+            }
+        }
 
-		public static unsafe void EraseArray(ref byte[] array)
-		{
-			if (array != null && array.Length != 0)
+        public static unsafe void EraseArray(ref byte[] array)
+        {
+            if (array != null && array.Length != 0)
             {
                 int length = array.Length;
                 fixed (byte* ptr = array)
@@ -32,6 +32,6 @@ namespace System.Security.Cryptography
             array = null;
         }
 
-		public abstract void Cipher(byte[] buffer, int offset, int count);
-	}
+        public abstract void Cipher(byte[] buffer, int offset, int count);
+    }
 }
