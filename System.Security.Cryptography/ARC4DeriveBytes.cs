@@ -9,11 +9,11 @@ namespace System.Security.Cryptography
     ///     This class could not be inherited.
     /// </summary> 
     public sealed class ARC4DeriveBytes : DeriveBytes
-	{
-		private ARC4CryptoProvider _arc4;
+    {
+        private ARC4CryptoProvider _arc4;
         private byte[] _key;
-		private byte[] _salt;
-		private bool _disposed = false;
+        private byte[] _salt;
+        private bool _disposed = false;
 
         /// <summary>
         ///     Current internal state of the algorithm <see cref = "ARC4" />.
@@ -21,7 +21,7 @@ namespace System.Security.Cryptography
         /// <exception cref="ObjectDisposedException">
         ///     Thrown if current instance of <see cref="ARC4DeriveBytes"/> is disposed.
         /// </exception> 
-		public ARC4SBlock State
+        public ARC4SBlock State
         {
             get
             {
@@ -76,12 +76,12 @@ namespace System.Security.Cryptography
         ///     Thrown if the <paramref name="key"/> parameter is <see langword="null"/>.
         /// </exception> 
         public ARC4DeriveBytes(byte[] key)
-		{
+        {
             _key = key ?? throw new ArgumentNullException(nameof(key));
             _salt = new byte[4];
             CryptoProvider.InternalRng.GetBytes(_salt);
             Reset();
-		}
+        }
 
         /// <summary>
         ///     Initializes a new instance <see cref = "ARC4DeriveBytes" />
@@ -100,7 +100,7 @@ namespace System.Security.Cryptography
         ///     Thrown if one of the required arguments is <see langword="null"/>.
         /// </exception> 
         public ARC4DeriveBytes(byte[] key, params byte[] salt)
-		{
+        {
             if (salt == null) throw new ArgumentNullException(nameof(salt));
             if (salt.Length < 4) throw new ArgumentOutOfRangeException(nameof(salt), salt.Length, 
                 DefaultFormatter.FormatMessage("Argument_InvalidArrayLength", 4));
@@ -108,7 +108,7 @@ namespace System.Security.Cryptography
             _key = key ?? throw new ArgumentNullException(nameof(key));
             _salt = salt;
             Reset();
-		}
+        }
 
         /// <summary>
         ///     Initializes a new instance <see cref = "ARC4DeriveBytes" />
@@ -130,7 +130,7 @@ namespace System.Security.Cryptography
         ///     Thrown if one of the required arguments is <see langword="null"/>.
         /// </exception> 
         public ARC4DeriveBytes(string password, Encoding encoding, params byte[] salt)
-		{
+        {
             if (password == null) throw new ArgumentNullException(nameof(password));
             if (encoding == null) throw new ArgumentNullException(nameof(encoding));
             if (salt == null) throw new ArgumentNullException(nameof(salt));
@@ -159,7 +159,7 @@ namespace System.Security.Cryptography
         ///     Thrown if less than 4 bytes of salt is passed.
         /// </exception>
         public ARC4DeriveBytes(string password, Encoding encoding)
-		{
+        {
             if (password == null) throw new ArgumentNullException(nameof(password));
             if (encoding == null) throw new ArgumentNullException(nameof(encoding));
 
@@ -208,8 +208,8 @@ namespace System.Security.Cryptography
         /// <exception cref="ObjectDisposedException">
         ///     Thrown if current instance of <see cref="ARC4DeriveBytes"/> is disposed.
         /// </exception> 
-		public override unsafe byte[] GetBytes(int cb)
-		{
+        public override unsafe byte[] GetBytes(int cb)
+        {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
@@ -226,15 +226,15 @@ namespace System.Security.Cryptography
                 }
             }
 
-			return result;
-		}
+            return result;
+        }
 
         /// <inheritdoc cref="DeriveBytes.Reset"/>
         /// <exception cref="ObjectDisposedException">
         ///     Thrown if current instance of <see cref="ARC4DeriveBytes"/> is disposed.
         /// </exception> 
-		public override void Reset()
-		{
+        public override void Reset()
+        {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
@@ -242,7 +242,7 @@ namespace System.Security.Cryptography
             }
 
             _arc4 = new ARC4CryptoProvider(_key, ARC4SBlock.FromSalt(_salt));
-		}
+        }
 
         /// <inheritdoc cref="DeriveBytes.Dispose(bool)"/>
         protected override void Dispose(bool disposing)
@@ -259,9 +259,9 @@ namespace System.Security.Cryptography
         /// <summary>
         /// <inheritdoc cref="object.Finalize"/>.
         /// </summary>
-		~ARC4DeriveBytes()
-		{
+        ~ARC4DeriveBytes()
+        {
             Dispose(false);
-		}
-	}
+        }
+    }
 }
