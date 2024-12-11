@@ -210,11 +210,11 @@ void CreateRandomSBlock()
         int x = random[1];
         int a = _A[random[2] % _A.Length];
         int c = _C[random[3] % _C.Length];
-        int s = (byte)(((random[2] >> 6) & 0b11) | ((random[3] >> 7) & 1));
+        int s = (byte)(((random[2] >> 6) & 3) | ((random[3] >> 7) & 1));
         const int m = 256;
         for (int i = 0; i < m; i++)
         {
-            int b = (x = (a * x + c) & (m - 1)) ^ r;
+            int b = (x = (a * x + c) % m)) ^ r;
             sblock[i] = (byte)((b << s) | (b >> (8 - s)));
         }
     }

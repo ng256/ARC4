@@ -209,7 +209,7 @@ namespace System.Security.Cryptography
             for (int i = 0; i < m; i++)
             {
                 int b = (x = (a * x + c) & (m - 1)) ^ r;
-                _bytes[i] = (byte)((b << s) | (b >> (8 - s)));
+                _bytes[i] = (byte)(((b << s) | (b >> (8 - s))) & 0xFF);
             }
 
             if (!ValidBytes(_bytes))
