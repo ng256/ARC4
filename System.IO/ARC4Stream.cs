@@ -332,10 +332,10 @@ namespace System.IO
 		protected override void Dispose(bool disposing)
 		{
             if (_disposed) return;
-            _arc4?.EraseState();
+            _arc4?.Dispose();
             _disposed = true;
             if (!disposing) return;
-            if (!_leaveOpen) _stream?.Close();
+            if (!_leaveOpen) _stream?.Dispose();
             _stream = null;
 			_arc4 = null;
 		}

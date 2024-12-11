@@ -32,7 +32,15 @@ namespace System.Security.Cryptography
 			return _sblock[(_sblock[x] + _sblock[y]) % 256];
 		}
 
-		public ARC4CryptoProvider(byte[] key) // KSA
+        public void DropDown(int n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                NextByte();
+            }
+        }
+
+        public ARC4CryptoProvider(byte[] key) // KSA
 		{
 			if (key == null)
 			{
@@ -53,7 +61,10 @@ namespace System.Security.Cryptography
 					j = (j + _sblock[i] + key[i % keyLength]) % 256;
 					Swap(_sblock, i, j);
 				}
-			}
+
+                DropDown(256);
+
+            }
 			catch (Exception e)
 			{
 				throw new CryptographicException(
@@ -92,7 +103,9 @@ namespace System.Security.Cryptography
 					j = (j + _sblock[i] + key[i % keyLength]) % 256;
 					Swap(_sblock, i, j);
 				}
-			}
+
+                DropDown(256);
+            }
 			catch (Exception e)
 			{
 				throw new CryptographicException(
@@ -126,7 +139,9 @@ namespace System.Security.Cryptography
 					j = (j + _sblock[i] + key[i % keyLength]) % 256;
 					Swap(_sblock, i, j);
 				}
-			}
+
+                DropDown(256);
+            }
 			catch (Exception e)
 			{
 				throw new CryptographicException(string.Format("{0} {1}",
@@ -147,31 +162,25 @@ namespace System.Security.Cryptography
 		public override void Cipher(byte[] buffer, int offset, int count)
 		{
 			if (buffer == null)
-			{
-				throw new ArgumentNullException(nameof(buffer));
-			}
-			int bufferLength = buffer.Length;
+                throw new ArgumentNullException(nameof(buffer));
+
+            int bufferLength = buffer.Length;
+
 			if (bufferLength == 0)
-			{
-				throw new ArgumentException(DefaultFormatter.
-                    GetMessage("Cryptography_InsufficientBuffer"), nameof(buffer));
-			}
-			if (count < 0 || count > bufferLength)
-			{
-				throw new ArgumentException(DefaultFormatter.
-                    FormatMessage("ArgumentOutOfRange_ArrayLength", 0, bufferLength), nameof(count));
-			}
-			int length = bufferLength - count;
+                throw new ArgumentException(DefaultFormatter.GetMessage("Cryptography_InsufficientBuffer"), nameof(buffer));
+
+            if (count < 0 || count > bufferLength)
+                throw new ArgumentException(DefaultFormatter.FormatMessage("ArgumentOutOfRange_ArrayLength", 0, bufferLength), nameof(count));
+
+            int length = bufferLength - count;
+
 			if (offset < 0 || offset > length)
-			{
-				throw new ArgumentException(DefaultFormatter.
-                    GetMessage("ArgumentOutOfRange_IndexOutOfRange"), nameof(offset));
-			}
-			if (count == 0)
-			{
-				return;
-			}
-			try
+                throw new ArgumentException(DefaultFormatter.GetMessage("ArgumentOutOfRange_IndexOutOfRange"), nameof(offset));
+
+            if (count == 0)
+                return;
+
+            try
 			{
 				for (int i = offset; i < count; i++)
 				{

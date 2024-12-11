@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
@@ -16,8 +15,7 @@ namespace System.ComponentModel
 		private readonly Assembly _assembly = _mscorlib;
 		private readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
-		public int LCID => _lcid;
-		public static AssemblyMessageFormatter DefaultFormatter => _defaultFormatter;
+        public static AssemblyMessageFormatter DefaultFormatter => _defaultFormatter;
 
 		static AssemblyMessageFormatter()
 		{
@@ -92,22 +90,7 @@ namespace System.ComponentModel
 			}
 		}
 
-		private static string GetDescription(Enum enumElement)
-		{
-			Type type = enumElement.GetType();
-			MemberInfo[] memInfo = type.GetMember(enumElement.ToString());
-			if (memInfo != null && memInfo.Length != 0)
-			{
-				object[] attrs = memInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), inherit: false);
-				if (attrs != null && attrs.Length != 0)
-				{
-					return ((DescriptionAttribute)attrs[0]).Description;
-				}
-			}
-			return enumElement.ToString();
-		}
-
-		public static string GetMessage(string messageId, CultureInfo targetUICulture = null, Assembly assembly = null)
+        public static string GetMessage(string messageId, CultureInfo targetUICulture = null, Assembly assembly = null)
 		{
 			try
 			{
@@ -138,19 +121,7 @@ namespace System.ComponentModel
 			return string.Format(_culture, GetMessage(messageId), arguments);
 		}
 
-		public Exception CreateException(Exception innerException, string messageId, params object[] arguments)
-		{
-			string message = FormatMessage(messageId, arguments);
-			return new Exception(message, innerException);
-		}
-
-		public Exception CreateException(string messageId, params object[] arguments)
-		{
-			string message = FormatMessage(messageId, arguments);
-			return new Exception(message);
-		}
-
-		public override string ToString()
+        public override string ToString()
 		{
 			string name = CultureInfo.GetCultureInfo(_lcid).DisplayName;
 			return string.IsNullOrEmpty(name) ? _lcid.ToString() : name;

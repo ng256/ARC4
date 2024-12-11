@@ -10,8 +10,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("NG256")]
 [assembly: AssemblyProduct("NG256 ARC4 Crypto Provider")]
 [assembly: AssemblyCopyright("© NG256 2021")]
-[assembly: AssemblyFileVersion("1.1.2112.2")]
-[assembly: AssemblyVersion("1.1.2112.2")]
+[assembly: AssemblyFileVersion("1.1.2412.0003")]
+[assembly: AssemblyVersion("1.1.2412.0003")]
 [assembly: ComVisible(false)]
 [assembly: Guid("a8034c63-6691-4899-8ee4-e76465fdba78")]
 #if DEBUG
