@@ -47,25 +47,15 @@ namespace System.Security.Cryptography
         public ARC4Managed(byte[] key, byte[] iv)
         {
             if (key == null)
-            {
                 throw new ArgumentNullException(nameof(key));
-            }
             if (key.Length == 0)
-            {
                 throw new ArgumentException(null, nameof(key));
-            }
             if (iv == null)
-            {
                 throw new ArgumentNullException(nameof(iv));
-            }
             if (iv.Length != IVSizeValue)
-            {
                 throw new ArgumentException(DefaultFormatter.GetMessage("Cryptography_InvalidIVSize"), nameof(iv));
-            }
             if (!ARC4SBlock.ValidBytes(iv))
-            {
                 throw new ArgumentException(null, nameof(iv));
-            }
 
             int keyLength = key.Length;
             KeyValue = new byte[keyLength];
@@ -101,19 +91,11 @@ namespace System.Security.Cryptography
         public ARC4Managed(byte[] key, ARC4SBlock[] sblock)
         {
             if (key == null)
-            {
                 throw new ArgumentNullException(nameof(key));
-            }
-
             if (key.Length == 0)
-            {
                 throw new ArgumentException(null, nameof(key));
-            }
-
             if (sblock == null)
-            {
                 throw new ArgumentNullException(nameof(sblock));
-            }
 
             int keyLength = key.Length;
             KeyValue = new byte[keyLength];

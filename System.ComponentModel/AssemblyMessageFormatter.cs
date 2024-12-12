@@ -6,125 +6,125 @@ using System.Resources;
 
 namespace System.ComponentModel
 {
-	internal class AssemblyMessageFormatter
-	{
-		private static readonly int[] _installedLangs;
-		private static readonly AssemblyMessageFormatter _defaultFormatter;
-		private static readonly Assembly _mscorlib;
-		private readonly int _lcid = CultureInfo.CurrentUICulture.LCID;
-		private readonly Assembly _assembly = _mscorlib;
-		private readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
+    internal class AssemblyMessageFormatter
+    {
+        private static readonly int[] _installedLangs;
+        private static readonly AssemblyMessageFormatter _defaultFormatter;
+        private static readonly Assembly _mscorlib;
+        private readonly int _lcid = CultureInfo.CurrentUICulture.LCID;
+        private readonly Assembly _assembly = _mscorlib;
+        private readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
         public static AssemblyMessageFormatter DefaultFormatter => _defaultFormatter;
 
-		static AssemblyMessageFormatter()
-		{
-			_defaultFormatter = new AssemblyMessageFormatter();
-			_mscorlib = Assembly.GetAssembly(typeof(object));
-			CultureInfo[] installedCultures = CultureInfo.GetCultures(CultureTypes.InstalledWin32Cultures);
-			CultureInfo[] specificCultures = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
-			List<int> installedLangs = new List<int>(installedCultures.Length);
-			CultureInfo[] array = specificCultures;
-			foreach (CultureInfo culture in array)
-			{
-				if (installedCultures.Contains(culture))
-				{
-					installedLangs.Add(culture.LCID);
-				}
-			}
-			_installedLangs = installedLangs.ToArray();
-		}
+        static AssemblyMessageFormatter()
+        {
+            _defaultFormatter = new AssemblyMessageFormatter();
+            _mscorlib = Assembly.GetAssembly(typeof(object));
+            CultureInfo[] installedCultures = CultureInfo.GetCultures(CultureTypes.InstalledWin32Cultures);
+            CultureInfo[] specificCultures = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
+            List<int> installedLangs = new List<int>(installedCultures.Length);
+            CultureInfo[] array = specificCultures;
+            foreach (CultureInfo culture in array)
+            {
+                if (installedCultures.Contains(culture))
+                {
+                    installedLangs.Add(culture.LCID);
+                }
+            }
+            _installedLangs = installedLangs.ToArray();
+        }
 
-		public AssemblyMessageFormatter(Assembly assembly = null)
-		{
-			if (assembly != null)
-			{
-				_assembly = assembly;
-			}
-		}
+        public AssemblyMessageFormatter(Assembly assembly = null)
+        {
+            if (assembly != null)
+            {
+                _assembly = assembly;
+            }
+        }
 
-		public AssemblyMessageFormatter(int lcid, Assembly assembly = null)
-			: this(assembly)
-		{
-			if (_installedLangs.Contains(lcid))
-			{
-				_culture = new CultureInfo(lcid);
-				_lcid = lcid;
-			}
-		}
+        public AssemblyMessageFormatter(int lcid, Assembly assembly = null)
+            : this(assembly)
+        {
+            if (_installedLangs.Contains(lcid))
+            {
+                _culture = new CultureInfo(lcid);
+                _lcid = lcid;
+            }
+        }
 
-		public AssemblyMessageFormatter(CultureInfo culture, Assembly assembly = null)
-			: this(assembly)
-		{
-			if (culture != null && _installedLangs.Contains(culture.LCID))
-			{
-				_culture = culture;
-				_lcid = culture.LCID;
-			}
-		}
+        public AssemblyMessageFormatter(CultureInfo culture, Assembly assembly = null)
+            : this(assembly)
+        {
+            if (culture != null && _installedLangs.Contains(culture.LCID))
+            {
+                _culture = culture;
+                _lcid = culture.LCID;
+            }
+        }
 
-		public AssemblyMessageFormatter(TextInfo info, Assembly assembly = null)
-			: this(assembly)
-		{
-			if (info != null && _installedLangs.Contains(info.LCID))
-			{
-				_culture = new CultureInfo(info.LCID);
-				_lcid = info.LCID;
-			}
-		}
+        public AssemblyMessageFormatter(TextInfo info, Assembly assembly = null)
+            : this(assembly)
+        {
+            if (info != null && _installedLangs.Contains(info.LCID))
+            {
+                _culture = new CultureInfo(info.LCID);
+                _lcid = info.LCID;
+            }
+        }
 
-		public AssemblyMessageFormatter(string name, Assembly assembly = null)
-			: this(assembly)
-		{
-			try
-			{
-				CultureInfo culture = CultureInfo.GetCultureInfo(name);
-				if (_installedLangs.Contains(culture.LCID))
-				{
-					_lcid = culture.LCID;
-				}
-			}
-			catch
-			{
-				_lcid = CultureInfo.CurrentUICulture.LCID;
-			}
-		}
+        public AssemblyMessageFormatter(string name, Assembly assembly = null)
+            : this(assembly)
+        {
+            try
+            {
+                CultureInfo culture = CultureInfo.GetCultureInfo(name);
+                if (_installedLangs.Contains(culture.LCID))
+                {
+                    _lcid = culture.LCID;
+                }
+            }
+            catch
+            {
+                _lcid = CultureInfo.CurrentUICulture.LCID;
+            }
+        }
 
         public static string GetMessage(string messageId, CultureInfo targetUICulture = null, Assembly assembly = null)
-		{
-			try
-			{
-				if (targetUICulture == null)
-				{
-					targetUICulture = CultureInfo.CurrentUICulture;
-				}
-				if (assembly == null)
-				{
-					assembly = _mscorlib;
-				}
-				ResourceManager resourceManager = new ResourceManager(assembly.GetName().Name, assembly);
-				return resourceManager.GetResourceSet(targetUICulture, createIfNotExists: true, tryParents: true)?.GetString(messageId);
-			}
-			catch
-			{
-				return null;
-			}
-		}
+        {
+            try
+            {
+                if (targetUICulture == null)
+                {
+                    targetUICulture = CultureInfo.CurrentUICulture;
+                }
+                if (assembly == null)
+                {
+                    assembly = _mscorlib;
+                }
+                ResourceManager resourceManager = new ResourceManager(assembly.GetName().Name, assembly);
+                return resourceManager.GetResourceSet(targetUICulture, createIfNotExists: true, tryParents: true)?.GetString(messageId);
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
-		public string GetMessage(string messageId)
-		{
-			return GetMessage(messageId, new CultureInfo(_lcid), _assembly);
-		}
+        public string GetMessage(string messageId)
+        {
+            return GetMessage(messageId, new CultureInfo(_lcid), _assembly);
+        }
 
-		public string FormatMessage(string messageId, params object[] arguments)
-		{
-			return string.Format(_culture, GetMessage(messageId), arguments);
-		}
+        public string FormatMessage(string messageId, params object[] arguments)
+        {
+            return string.Format(_culture, GetMessage(messageId), arguments);
+        }
 
         public override string ToString()
-		{
-			string name = CultureInfo.GetCultureInfo(_lcid).DisplayName;
-			return string.IsNullOrEmpty(name) ? _lcid.ToString() : name;
-		}
-	}
+        {
+            string name = CultureInfo.GetCultureInfo(_lcid).DisplayName;
+            return string.IsNullOrEmpty(name) ? _lcid.ToString() : name;
+        }
+    }
 }

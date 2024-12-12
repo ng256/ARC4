@@ -3,7 +3,7 @@ using static System.ComponentModel.AssemblyMessageFormatter;
 namespace System.Security.Cryptography
 {
     // Provides methods and properties for implementing ARC4 data encryption.
-    internal sealed class ARC4CryptoProvider : CryptoProvider, IDisposable
+    internal sealed class ARC4CryptoProvider : IDisposable
     {
         private byte[] _sblock = new byte[256]; // S
         private int x = 0;
@@ -151,7 +151,7 @@ namespace System.Security.Cryptography
         }
 
                 // Performs symmetric encryption using the ARC4 algorithm. 
-        public override void Cipher(byte[] buffer, int offset, int count)
+        public void Cipher(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
@@ -194,7 +194,7 @@ namespace System.Security.Cryptography
             {
                 fixed (int* ptr = &x) *ptr = -1;
                 fixed (int* ptr = &y) *ptr = -1;
-                EraseArray(ref _sblock);
+                CryptoProvider.EraseArray(ref _sblock);
             }
             finally
             {

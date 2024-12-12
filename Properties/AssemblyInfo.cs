@@ -17,6 +17,8 @@ using System.Runtime.InteropServices;
 #if DEBUG
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default | DebuggableAttribute.DebuggingModes.DisableOptimizations | DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints | DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 [assembly: AssemblyConfiguration("Debug")]
+[assembly: InternalsVisibleTo("ARC4DemoApp")]
+[assembly: InternalsVisibleTo("ARC4Demo")]
 #else
 [assembly: AssemblyConfiguration("Release")]
 #endif
