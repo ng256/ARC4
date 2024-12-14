@@ -1,5 +1,7 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using static System.Security.Cryptography.InternalTools;
 
 namespace System.Security.Cryptography
@@ -55,6 +57,7 @@ namespace System.Security.Cryptography
         {
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override byte NextByte()
         {
             if (_disposed)
@@ -64,6 +67,7 @@ namespace System.Security.Cryptography
             return GeneratePRGA();
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override byte GetByte(byte value)
         {
             if (_disposed)
@@ -75,6 +79,7 @@ namespace System.Security.Cryptography
                 : _state2.GetByte(value);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Update(byte[] key)
         {
             if (_disposed)
@@ -85,6 +90,7 @@ namespace System.Security.Cryptography
             _state2.Update(key);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void DropDown(int n)
         {
             if (_disposed)
@@ -95,6 +101,7 @@ namespace System.Security.Cryptography
             _state2.DropDown(n);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override byte[] GetBytes(int n)
         {
             if (_disposed)
@@ -110,15 +117,41 @@ namespace System.Security.Cryptography
             return keyStream;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public override byte[] Cipher(byte[] inputBuffer, int inputOffset, int inputCount)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
+                    GetResourceString("ObjectDisposed_Generic"));
+
+            return base.Cipher(inputBuffer, inputOffset, inputCount);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public override int Cipher(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(ARC4DeriveBytes),
+                    GetResourceString("ObjectDisposed_Generic"));
+
+            return base.Cipher(inputBuffer, inputOffset, inputCount, outputBuffer, outputOffset);
+        }
+
         protected internal override unsafe byte* KeyStream(int n)
         {
             if (n <= 0 || n > 256)
                 throw new ArgumentOutOfRangeException(nameof(n),
                     GetResourceString("ArgumentOutOfRange_Bounds_Lower_Upper", 1, 256));
 
-            byte* keyStream1 = _state1.KeyStream(n);
-            byte* keyStream2 = _state2.KeyStream(n);
+            byte* keyStream1 = null;
+            byte* keyStream2 = null;
 
+            // Generate key streams concurrently.
+            Task t1 = Task.Run(() => keyStream1 = _state1.KeyStream(n));
+            Task t2 = Task.Run(() => keyStream2 = _state2.KeyStream(n));
+            Task.WaitAll(t1, t2);
+
+            // Allocate memory for the final key stream on the stack.
             byte* keyStream = stackalloc byte[n];
             for (int i = 0; i < n; i++)
             {
@@ -129,7 +162,7 @@ namespace System.Security.Cryptography
         }
 
         // Generates the next byte using the Pseudo-Random Generation Algorithm (PRGA+).
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected internal byte GeneratePRGA()
         {
             byte[] output = new byte[2];
@@ -141,6 +174,7 @@ namespace System.Security.Cryptography
             return k;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override string ToString()
         {
             string s2 = _state2.ToString();
@@ -169,6 +203,7 @@ namespace System.Security.Cryptography
             Dispose(true);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override object Clone()
         {
             return new ARC4DualCryptoProvider(
@@ -176,6 +211,7 @@ namespace System.Security.Cryptography
                 (CryptoProvider)_state2.Clone());
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         protected void Dispose(bool disposing)
         {
             if (_disposed)
