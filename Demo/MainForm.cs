@@ -20,7 +20,9 @@ namespace ARC4Demo
         private SplitContainer splitContainer;
         private Button cmdSBlock;
         private Container components;
-        private ARC4SBlock sblock = ARC4SBlock.DefaultSBlock;
+        private byte[] iv = new byte[4];
+        private int skip = 0;
+        private bool plus = false;
 
         public MainForm()
         {
@@ -153,7 +155,7 @@ namespace ARC4Demo
             {
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    using (ARC4Stream stream = new ARC4Stream(memoryStream, txtPassword.Text, (byte[])sblock.Clone(), true))
+                    using (ARC4Stream stream = new ARC4Stream(memoryStream, txtPassword.Text, iv, leaveOpen: true))
                     {
                         using (StreamWriter streamWriter = new StreamWriter(stream))
                         {
@@ -180,7 +182,7 @@ namespace ARC4Demo
             {
                 using (MemoryStream stream = new MemoryStream(txtEncrypted.Text.FromHex()))
                 {
-                    using (ARC4Stream stream2 = new ARC4Stream(stream, txtPassword.Text, (byte[])sblock.Clone(), true))
+                    using (ARC4Stream stream2 = new ARC4Stream(stream, txtPassword.Text, iv, skip, plus, true))
                     {
                         using (StreamReader streamReader = new StreamReader(stream2))
                         {
@@ -226,7 +228,7 @@ namespace ARC4Demo
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            sblock = ARC4SBlock.DefaultSBlock;
+            iv = BitConverter.GetBytes(0);
             txtPassword.Text = "fourwordsalluppercase";
             txtOriginal.Text = "Hello, world!";
             DoEncrypt();
@@ -237,22 +239,21 @@ namespace ARC4Demo
             if (disposing)
             {
                 Container container = components;
-                if (container != null)
-                {
-                    container.Dispose();
-                }
+                container?.Dispose();
             }
             base.Dispose(disposing);
         }
 
         private void btnSBlock_Click(object sender, EventArgs e)
         {
-            using (SblockForm sblockForm = new SblockForm(sblock))
+            using (SblockForm sblockForm = new SblockForm(iv))
             {
                 sblockForm.Password = txtPassword.Text;
                 if (sblockForm.ShowDialog() == DialogResult.OK)
                 {
-                    sblock = sblockForm.SBlock;
+                    iv = sblockForm.IV;
+                    skip = sblockForm.SkipSize;
+                    plus = sblockForm.Plus;
                     txtPassword.Text = sblockForm.Password;
                 }
             }

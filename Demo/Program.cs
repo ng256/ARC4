@@ -9,6 +9,7 @@ namespace ARC4Demo
         [STAThread]
         internal static void Main()
         {
+            Application.EnableVisualStyles();
             Application.Run(new MainForm());
         }
 
