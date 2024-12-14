@@ -8,7 +8,7 @@ namespace System.Security.Cryptography
 {
     [Serializable]
     [SecurityCritical]
-    //[StructLayout(LayoutKind.Sequential, Pack = 4, Size = 256 + sizeof(int) * 2)]
+    [StructLayout(LayoutKind.Auto, Pack = 4, Size = 256 + sizeof(int) * 2)]
 #if DEBUG
     [DebuggerDisplay("{ToString()}")]
 #endif
@@ -212,6 +212,7 @@ namespace System.Security.Cryptography
         #region Tools
 
         // Creates a shallow copy of the current object.
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override object Clone()
         {
             if (_sblock == null)
@@ -225,6 +226,7 @@ namespace System.Security.Cryptography
         }
 
         // Returns a string representation of this object.
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override string ToString()
         {
             if (_sblock == null)

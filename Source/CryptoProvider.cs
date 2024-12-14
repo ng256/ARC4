@@ -1,4 +1,5 @@
-﻿using static System.Security.Cryptography.InternalTools;
+﻿using System.Runtime.CompilerServices;
+using static System.Security.Cryptography.InternalTools;
 
 namespace System.Security.Cryptography
 {
@@ -106,7 +107,7 @@ namespace System.Security.Cryptography
         }
 
         // Swaps two elements in the byte array.
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Swap(byte* bytes, int i, int j)
         {
             if (i != j)
