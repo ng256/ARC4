@@ -47,6 +47,7 @@ namespace System.Security.Cryptography
             switch (iv.Length - index)
             {
                 case 4:
+                case 8:
                     Initialize(_sblock, iv, index);
                     break;
                 case 256:
