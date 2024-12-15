@@ -261,10 +261,6 @@ namespace ARC4Demo
                 
                 if (dual)
                 {
-
-
-                    //this.MinimumSize = new Size(370 * 2 - 20, 500);
-                    //this.Size = new Size(370 * 2, 500);
                     uint j = i;
                     j ^= (j >> 16);
                     j *= 0x85ebca6b;
@@ -277,8 +273,6 @@ namespace ARC4Demo
                 }
                 else
                 {
-                    //this.MinimumSize = new Size(370, 500);
-                    //this.Size = new Size(370, 500);
                     iv = BitConverter.GetBytes(i);
                 }
 
@@ -296,11 +290,6 @@ namespace ARC4Demo
                     this.MinimumSize = size;
                     this.Size = size;
                 }
-
-                /*using (ARC4DeriveBytes deriveBytes = new ARC4DeriveBytes(key, iv))
-                {
-                    txtSBlock.Text = deriveBytes.State;
-                }*/
             }
             catch (Exception ex)
             {
