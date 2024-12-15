@@ -9,7 +9,7 @@ namespace System.Security.Cryptography
     // RC4+ algorithm implementation based on the 2008 design by Subhamoy Maitra and Goutam Paul.
     [Serializable]
     [SecurityCritical]
-    //[StructLayout(LayoutKind.Sequential, Pack = 4, Size = 256 + sizeof(int) * 2)]
+    [StructLayout(LayoutKind.Auto, Pack = 4, Size = 256 + sizeof(int) * 2)]
 #if DEBUG
     [DebuggerDisplay("{ToString()}")]
 #endif
