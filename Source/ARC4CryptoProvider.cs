@@ -8,7 +8,7 @@ namespace System.Security.Cryptography
 {
     [Serializable]
     [SecurityCritical]
-    //[StructLayout(LayoutKind.Sequential, Pack = 4, Size = 256 + sizeof(int) * 2)]
+    [StructLayout(LayoutKind.Auto, Pack = 4, Size = 256 + sizeof(int) * 2)]
 #if DEBUG
     [DebuggerDisplay("{ToString()}")]
 #endif
@@ -47,6 +47,7 @@ namespace System.Security.Cryptography
             switch (iv.Length - index)
             {
                 case 4:
+                case 8:
                     Initialize(_sblock, iv, index);
                     break;
                 case 256:
